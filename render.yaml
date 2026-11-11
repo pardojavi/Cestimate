@@ -1,0 +1,40 @@
+# Blueprint de Render para la API de Cestimate.
+#
+# Cómo desplegar (≈2 minutos, solo la primera vez):
+#   1. Crea una cuenta en https://render.com con tu GitHub (pardojavi).
+#   2. New → Blueprint → conecta el repo pardojavi/Cestimate.
+#   3. Render detecta este archivo y crea el servicio. Espera el primer deploy.
+#   4. Copia la URL pública (https://cestimate-api.onrender.com) y pégala en
+#      la app: Ajustes → URL de la API → «Guardar y conectar».
+#
+# Plan gratis: la instancia se duerme tras ~15 min sin uso (el primer arranque
+# tarda ~50 s) y el disco es efímero (la BD se regenera, pero las cestas
+# guardadas se pierden al redesplegar). Para uso diario con datos persistentes:
+#   - cambia plan: paid, y añade el bloque `disk` de abajo (descoméntalo).
+
+services:
+  - type: web
+    name: cestimate-api
+    runtime: node
+    plan: free
+    healthCheckPath: /api/health
+    buildCommand: npm ci --include=dev
+    startCommand: npm run start -w apps/api
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # En producción solo debe responder la web de Pages:
+      - key: CORS_ORIGIN
+        value: https://pardojavi.github.io
+      - key: USER_AGENT
+        value: Cestimate/1.0 (+https://github.com/pardojavi/Cestimate)
+      - key: DEFAULT_POSTAL_CODE
+        value: "28001"
+      - key: DATABASE_PATH
+        value: ./data/cestimate.db
+    # Para persistencia real (plan paid), descomenta:
+    # disk:
+    #   name: cestimate-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
+    # y cambia DATABASE_PATH a /var/data/cestimate.db
