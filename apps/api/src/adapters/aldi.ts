@@ -1,6 +1,7 @@
 import {
   coincideFlex,
   tokenizar,
+  terminosExigidos,
   zAldiResponse,
   type AldiHit,
   type StoreProduct,
@@ -67,6 +68,12 @@ export function crearAldi(base: DB): StoreAdapter {
     id: "aldi",
 
     async search(query: string, ctx: Contexto): Promise<StoreProduct[]> {
+      const terminos = tokenizar(query);
+      if (terminos.length === 0) return [];
+      // A Algolia solo mandamos los términos relevantes: si mandamos la
+      // consulta cruda («leche entera 1 l») no devuelve hits.
+      const consultaLimpia = terminosExigidos(terminos).join(" ");
+
       const respuesta = await fetch(URL, {
         method: "POST",
         headers: {
@@ -75,7 +82,10 @@ export function crearAldi(base: DB): StoreAdapter {
           "Content-Type": "application/json",
           "User-Agent": `Cestimate/1.0`,
         },
-        body: JSON.stringify({ query, hitsPerPage: POR_PAGINA }),
+        body: JSON.stringify({
+          query: consultaLimpia,
+          hitsPerPage: POR_PAGINA,
+        }),
         signal: AbortSignal.timeout(10_000),
       });
       if (!respuesta.ok) {
@@ -103,9 +113,6 @@ export function crearAldi(base: DB): StoreAdapter {
           "Esquema inesperado en la respuesta de Aldi (¿han cambiado los campos?)",
         );
       }
-
-      const terminos = tokenizar(query);
-      if (terminos.length === 0) return [];
 
       const productos: StoreProduct[] = [];
       for (const hit of parseado.data.hits) {
