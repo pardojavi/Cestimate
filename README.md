@@ -23,7 +23,7 @@ Cestimate es una webapp (mobile-first, pensada para iPhone) para comparar el pre
 
 ## Requisitos
 
-- **Node ≥ 20** (probado con Node 24). Si usas nvm: `nvm use 24`.
+- **Node ≥ 22** (probado con Node 24; `better-sqlite3` 13 lo exige). Si usas nvm: `nvm use 24`.
 - Sin dependencias de sistema: `better-sqlite3` se instala con binario precompilado.
 
 ## Instalación y arranque
