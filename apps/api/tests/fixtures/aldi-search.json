@@ -1,0 +1,511 @@
+{
+  "nbHits": 123,
+  "hits": [
+    {
+      "objectID": "872200",
+      "_highlightResult": {
+        "brandName": {
+          "value": "MILSANI®",
+          "matchLevel": "none",
+          "matchedWords": []
+        },
+        "hierarchicalCategories": {
+          "lvl0": [
+            {
+              "value": "Lácteos y huevos",
+              "matchLevel": "none",
+              "matchedWords": []
+            },
+            {
+              "value": "Marcas",
+              "matchLevel": "none",
+              "matchedWords": []
+            }
+          ],
+          "lvl1": [
+            {
+              "value": "Lácteos y huevos > <em>Leche</em> y bebidas vegetales",
+              "matchLevel": "full",
+              "fullyHighlighted": false,
+              "matchedWords": ["leche"]
+            },
+            {
+              "value": "Marcas > Milsani",
+              "matchLevel": "none",
+              "matchedWords": []
+            }
+          ]
+        },
+        "categoryIDs": [
+          {
+            "value": "<em>leche</em>-y-bebidas-vegetales",
+            "matchLevel": "full",
+            "fullyHighlighted": false,
+            "matchedWords": ["leche"]
+          },
+          {
+            "value": "milsani",
+            "matchLevel": "none",
+            "matchedWords": []
+          }
+        ],
+        "name": {
+          "value": "<em>Leche</em> entera sin lactosa",
+          "matchLevel": "full",
+          "fullyHighlighted": false,
+          "matchedWords": ["leche"]
+        }
+      },
+      "longDescription": "El precio puede variar para las tiendas ubicadas en las Islas Baleares.\nEl precio puede variar para las tiendas ubicadas en las Islas Canarias.",
+      "brandName": "MILSANI®",
+      "productSlug": "leche-entera-sin-lactosa-872200",
+      "assets": [
+        {
+          "type": "primary",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/8722_pack_0_0_es_es_leche_entera_sin_lactosa_2024_cw21",
+          "title": "Leche entera sin lactosa | MILSANI® | ALDI Supermercados",
+          "altText": "Leche entera sin lactosa | MILSANI® | ALDI Supermercados",
+          "isAiGenerated": false
+        },
+        {
+          "type": "certificate",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/01_A_Origen_nacional",
+          "title": "Origen nacional | ALDI Supermercados",
+          "altText": "Origen nacional | ALDI Supermercados",
+          "isAiGenerated": false
+        },
+        {
+          "type": "certificate",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/48_Adilac",
+          "title": "Sin lactosa | ALDI Supermercados",
+          "altText": "Sin lactosa | ALDI Supermercados",
+          "isAiGenerated": false
+        }
+      ],
+      "productReferences": [
+        {
+          "type": "KVArticleNumber",
+          "value": "8722"
+        }
+      ],
+      "mainCategoryID": "leche-y-bebidas-vegetales",
+      "isAvailable": true,
+      "isRecall": false,
+      "salesUnit": "1 l unidad",
+      "hierarchicalCategories": {
+        "lvl0": ["Lácteos y huevos", "Marcas"],
+        "lvl1": [
+          "Lácteos y huevos > Leche y bebidas vegetales",
+          "Marcas > Milsani"
+        ]
+      },
+      "categoryIDs": ["leche-y-bebidas-vegetales", "milsani"],
+      "name": "Leche entera sin lactosa",
+      "currentPrice": {
+        "priceValue": 1.03,
+        "validFrom": 1783461600,
+        "validUntil": 1924988399
+      },
+      "shortDescription": "Sin lactosa.\nOrigen nacional.\nBienestar animal.",
+      "isComingSoon": false
+    },
+    {
+      "productSlug": "turron-dulce-de-leche-835903",
+      "categoryIDs": ["turrones"],
+      "salesUnit": "150 g unidad",
+      "productReferences": [
+        {
+          "type": "KVArticleNumber",
+          "value": "8359"
+        }
+      ],
+      "isAvailable": true,
+      "brandName": "SEASONS BEST®",
+      "hierarchicalCategories": {
+        "lvl0": ["Dulces de Navidad"],
+        "lvl1": ["Dulces de Navidad > Turrones"]
+      },
+      "name": "Turrón dulce de leche",
+      "mainCategoryID": "turrones",
+      "longDescription": "El precio puede variar para las tiendas ubicadas en las Islas Baleares.\nEl precio puede variar para las tiendas ubicadas en las Islas Canarias.",
+      "isRecall": false,
+      "currentPrice": {
+        "priceValue": 2.29,
+        "basePrice": [
+          {
+            "basePriceValue": 15.27,
+            "basePriceScale": "kg"
+          }
+        ],
+        "validFrom": 1791151200,
+        "validUntil": 1799449199
+      },
+      "isComingSoon": false,
+      "assets": [
+        {
+          "type": "primary",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/8359_pack_3_0_es_es_turron_dulce_leche_2026_cw31",
+          "title": "Turrón dulce de leche | SEASONS BEST® | ALDI Supermercados",
+          "altText": "Turrón dulce de leche | SEASONS BEST® | ALDI Supermercados",
+          "isAiGenerated": false
+        },
+        {
+          "type": "gallery",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/8359_emplatado_3_0_es_es_turron_dulce_de_leche_2025_cw42",
+          "title": "Turrón dulce de leche | SEASONS BEST® | ALDI Supermercados",
+          "altText": "Turrón dulce de leche | SEASONS BEST® | ALDI Supermercados",
+          "isAiGenerated": false
+        },
+        {
+          "type": "certificate",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/51_A_Rainforest_Alliance_Cacao_2021",
+          "title": "Rainforest Alliance nuevo-CACAO | ALDI Supermercados",
+          "altText": "Rainforest Alliance nuevo-CACAO | ALDI Supermercados",
+          "isAiGenerated": false
+        }
+      ],
+      "objectID": "835903",
+      "_highlightResult": {
+        "brandName": {
+          "value": "SEASONS BEST®",
+          "matchLevel": "none",
+          "matchedWords": []
+        },
+        "hierarchicalCategories": {
+          "lvl0": [
+            {
+              "value": "Dulces de Navidad",
+              "matchLevel": "none",
+              "matchedWords": []
+            }
+          ],
+          "lvl1": [
+            {
+              "value": "Dulces de Navidad > Turrones",
+              "matchLevel": "none",
+              "matchedWords": []
+            }
+          ]
+        },
+        "categoryIDs": [
+          {
+            "value": "turrones",
+            "matchLevel": "none",
+            "matchedWords": []
+          }
+        ],
+        "name": {
+          "value": "Turrón dulce de <em>leche</em>",
+          "matchLevel": "full",
+          "fullyHighlighted": false,
+          "matchedWords": ["leche"]
+        }
+      }
+    },
+    {
+      "_highlightResult": {
+        "brandName": {
+          "value": "MILSANI®",
+          "matchLevel": "none",
+          "matchedWords": []
+        },
+        "hierarchicalCategories": {
+          "lvl0": [
+            {
+              "value": "Lácteos y huevos",
+              "matchLevel": "none",
+              "matchedWords": []
+            },
+            {
+              "value": "Marcas",
+              "matchLevel": "none",
+              "matchedWords": []
+            }
+          ],
+          "lvl1": [
+            {
+              "value": "Lácteos y huevos > <em>Leche</em> y bebidas vegetales",
+              "matchLevel": "full",
+              "fullyHighlighted": false,
+              "matchedWords": ["leche"]
+            },
+            {
+              "value": "Marcas > Milsani",
+              "matchLevel": "none",
+              "matchedWords": []
+            }
+          ]
+        },
+        "categoryIDs": [
+          {
+            "value": "<em>leche</em>-y-bebidas-vegetales",
+            "matchLevel": "full",
+            "fullyHighlighted": false,
+            "matchedWords": ["leche"]
+          },
+          {
+            "value": "milsani",
+            "matchLevel": "none",
+            "matchedWords": []
+          }
+        ],
+        "name": {
+          "value": "<em>Leche</em> evaporada",
+          "matchLevel": "full",
+          "fullyHighlighted": false,
+          "matchedWords": ["leche"]
+        }
+      },
+      "hierarchicalCategories": {
+        "lvl0": ["Lácteos y huevos", "Marcas"],
+        "lvl1": [
+          "Lácteos y huevos > Leche y bebidas vegetales",
+          "Marcas > Milsani"
+        ]
+      },
+      "isComingSoon": false,
+      "mainCategoryID": "leche-y-bebidas-vegetales",
+      "longDescription": "El precio puede variar para las tiendas ubicadas en las Islas Canarias.",
+      "isRecall": false,
+      "assets": [
+        {
+          "type": "primary",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/8281_pack_0_0_es_es_leche_evaporada_2025_cw12"
+        }
+      ],
+      "salesUnit": "340 g unidad",
+      "name": "Leche evaporada",
+      "isAvailable": true,
+      "currentPrice": {
+        "priceValue": 0.92,
+        "basePrice": [
+          {
+            "basePriceValue": 2.71,
+            "basePriceScale": "kg"
+          }
+        ],
+        "validFrom": 1783461600,
+        "validUntil": 1924988399
+      },
+      "categoryIDs": ["leche-y-bebidas-vegetales", "milsani"],
+      "brandName": "MILSANI®",
+      "productSlug": "leche-evaporada-828100",
+      "productReferences": [
+        {
+          "type": "KVArticleNumber",
+          "value": "8281"
+        }
+      ],
+      "objectID": "828100"
+    },
+    {
+      "mainCategoryID": "leche-y-bebidas-vegetales",
+      "isAvailable": true,
+      "isComingSoon": false,
+      "assets": [
+        {
+          "type": "primary",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/820_pack_0_0_es_es_leche_con_calcio_semi_1l_2025_cw13",
+          "title": "Leche con calcio semidesnatada | MILSANI® | ALDI Supermercados",
+          "altText": "Leche con calcio semidesnatada | MILSANI® | ALDI Supermercados",
+          "isAiGenerated": false
+        },
+        {
+          "type": "certificate",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/01_A_Origen_nacional",
+          "title": "Origen nacional | ALDI Supermercados",
+          "altText": "Origen nacional | ALDI Supermercados",
+          "isAiGenerated": false
+        }
+      ],
+      "salesUnit": "1 l unidad",
+      "name": "Leche con calcio semidesnatada",
+      "brandName": "MILSANI®",
+      "isRecall": false,
+      "hierarchicalCategories": {
+        "lvl0": ["Lácteos y huevos", "Marcas"],
+        "lvl1": [
+          "Lácteos y huevos > Leche y bebidas vegetales",
+          "Marcas > Milsani"
+        ]
+      },
+      "categoryIDs": ["leche-y-bebidas-vegetales", "milsani"],
+      "productReferences": [
+        {
+          "type": "KVArticleNumber",
+          "value": "820"
+        }
+      ],
+      "_highlightResult": {
+        "brandName": {
+          "value": "MILSANI®",
+          "matchLevel": "none",
+          "matchedWords": []
+        },
+        "hierarchicalCategories": {
+          "lvl0": [
+            {
+              "value": "Lácteos y huevos",
+              "matchLevel": "none",
+              "matchedWords": []
+            },
+            {
+              "value": "Marcas",
+              "matchLevel": "none",
+              "matchedWords": []
+            }
+          ],
+          "lvl1": [
+            {
+              "value": "Lácteos y huevos > <em>Leche</em> y bebidas vegetales",
+              "matchLevel": "full",
+              "fullyHighlighted": false,
+              "matchedWords": ["leche"]
+            },
+            {
+              "value": "Marcas > Milsani",
+              "matchLevel": "none",
+              "matchedWords": []
+            }
+          ]
+        },
+        "categoryIDs": [
+          {
+            "value": "<em>leche</em>-y-bebidas-vegetales",
+            "matchLevel": "full",
+            "fullyHighlighted": false,
+            "matchedWords": ["leche"]
+          },
+          {
+            "value": "milsani",
+            "matchLevel": "none",
+            "matchedWords": []
+          }
+        ],
+        "name": {
+          "value": "<em>Leche</em> con calcio semidesnatada",
+          "matchLevel": "full",
+          "fullyHighlighted": false,
+          "matchedWords": ["leche"]
+        }
+      },
+      "productSlug": "leche-con-calcio-semidesnatada-82000",
+      "objectID": "82000",
+      "longDescription": "El precio puede variar para las tiendas ubicadas en las Islas Baleares.\nEl precio puede variar para las tiendas ubicadas en las Islas Canarias.",
+      "currentPrice": {
+        "priceValue": 1.05,
+        "validFrom": 1783461600,
+        "validUntil": 1924988399
+      },
+      "shortDescription": "De origen nacional.\nCon certificado de bienestar animal."
+    },
+    {
+      "productSlug": "leche-semidesnatada-sin-lactosa-81900",
+      "name": "Leche semidesnatada sin lactosa",
+      "_highlightResult": {
+        "brandName": {
+          "value": "MILSANI®",
+          "matchLevel": "none",
+          "matchedWords": []
+        },
+        "hierarchicalCategories": {
+          "lvl0": [
+            {
+              "value": "Lácteos y huevos",
+              "matchLevel": "none",
+              "matchedWords": []
+            },
+            {
+              "value": "Marcas",
+              "matchLevel": "none",
+              "matchedWords": []
+            }
+          ],
+          "lvl1": [
+            {
+              "value": "Lácteos y huevos > <em>Leche</em> y bebidas vegetales",
+              "matchLevel": "full",
+              "fullyHighlighted": false,
+              "matchedWords": ["leche"]
+            },
+            {
+              "value": "Marcas > Milsani",
+              "matchLevel": "none",
+              "matchedWords": []
+            }
+          ]
+        },
+        "categoryIDs": [
+          {
+            "value": "<em>leche</em>-y-bebidas-vegetales",
+            "matchLevel": "full",
+            "fullyHighlighted": false,
+            "matchedWords": ["leche"]
+          },
+          {
+            "value": "milsani",
+            "matchLevel": "none",
+            "matchedWords": []
+          }
+        ],
+        "name": {
+          "value": "<em>Leche</em> semidesnatada sin lactosa",
+          "matchLevel": "full",
+          "fullyHighlighted": false,
+          "matchedWords": ["leche"]
+        }
+      },
+      "isAvailable": true,
+      "brandName": "MILSANI®",
+      "currentPrice": {
+        "priceValue": 0.94,
+        "validFrom": 1783461600,
+        "validUntil": 1924988399
+      },
+      "mainCategoryID": "leche-y-bebidas-vegetales",
+      "isRecall": false,
+      "hierarchicalCategories": {
+        "lvl0": ["Lácteos y huevos", "Marcas"],
+        "lvl1": [
+          "Lácteos y huevos > Leche y bebidas vegetales",
+          "Marcas > Milsani"
+        ]
+      },
+      "salesUnit": "1 l unidad",
+      "productReferences": [
+        {
+          "type": "KVArticleNumber",
+          "value": "819"
+        }
+      ],
+      "longDescription": "El precio puede variar para las tiendas ubicadas en las Islas Baleares.\nEl precio puede variar para las tiendas ubicadas en las Islas Canarias.",
+      "shortDescription": "De origen nacional.\nCon certificado de bienestar animal.",
+      "isComingSoon": false,
+      "categoryIDs": ["leche-y-bebidas-vegetales", "milsani"],
+      "assets": [
+        {
+          "type": "primary",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/819_pack_0_0_es_es_leche_semi_sin_lac_2026_cw07",
+          "title": "Leche semidesnatada sin lactosa | MILSANI® | ALDI Supermercados",
+          "altText": "Leche semidesnatada sin lactosa | MILSANI® | ALDI Supermercados",
+          "isAiGenerated": false
+        },
+        {
+          "type": "certificate",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/01_A_Origen_nacional",
+          "title": "Origen nacional | ALDI Supermercados",
+          "altText": "Origen nacional | ALDI Supermercados",
+          "isAiGenerated": false
+        },
+        {
+          "type": "certificate",
+          "url": "https://s7g10.scene7.com/is/image/aldinord/48_Adilac",
+          "title": "Sin lactosa | ALDI Supermercados",
+          "altText": "Sin lactosa | ALDI Supermercados",
+          "isAiGenerated": false
+        }
+      ],
+      "objectID": "81900"
+    }
+  ]
+}

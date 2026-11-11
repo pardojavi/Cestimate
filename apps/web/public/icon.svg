@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Cestimate: cesta con etiqueta de precio">
+  <rect width="512" height="512" rx="112" fill="#2F6F4E"/>
+
+  <!-- Asa de la cesta -->
+  <path d="M176 236 C176 148 336 148 336 236" fill="none" stroke="#EEF1E6" stroke-width="24" stroke-linecap="round"/>
+
+  <!-- Cuerpo de la cesta -->
+  <path d="M104 236 H408 L372 394 Q368 410 352 410 H160 Q144 410 140 394 Z" fill="#EEF1E6" stroke="#EEF1E6" stroke-width="12" stroke-linejoin="round"/>
+
+  <!-- Listones -->
+  <g stroke="#2F6F4E" stroke-width="14" stroke-linecap="round">
+    <line x1="196" y1="274" x2="204" y2="372"/>
+    <line x1="256" y1="274" x2="256" y2="372"/>
+    <line x1="316" y1="274" x2="308" y2="372"/>
+  </g>
+
+  <!-- Etiqueta de precio -->
+  <g transform="translate(366 184) rotate(16) scale(1.5)">
+    <path d="M-52 0 L-24 -36 H52 V36 H-24 Z" fill="#C23B32" stroke="#2F6F4E" stroke-width="9" stroke-linejoin="round" paint-order="stroke"/>
+    <circle cx="-27" cy="0" r="6" fill="#2F6F4E"/>
+    <g fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round">
+      <path d="M32 -12 A16 16 0 1 0 32 12"/>
+      <line x1="4" y1="-4" x2="30" y2="-4"/>
+      <line x1="4" y1="4" x2="30" y2="4"/>
+    </g>
+  </g>
+</svg>

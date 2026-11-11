@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.log
+.env
+.env.local
+.DS_Store
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+**/data/*.db
+**/data/*.db-journal
+**/data/*.db-wal
+**/data/*.db-shm
+apps/web/dev-dist/
+coverage/

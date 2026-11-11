@@ -1,0 +1,754 @@
+{
+  "totalCount": 304,
+  "products": [
+    {
+      "id": 5931,
+      "productType": 1,
+      "code": "7080596",
+      "ean": "8414807514202",
+      "type": "product",
+      "productData": {
+        "name": "Leche Entera Brik",
+        "brand": {
+          "id": "CONSUM",
+          "name": "CONSUM",
+          "url": "consum",
+          "landing": false
+        },
+        "url": "https://tienda.consum.es/es/p/leche-entera-brik/7080596",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080596.jpg?t=20260812080202",
+        "description": "Leche Entera Brik 1 L",
+        "seo": "leche-entera-brik",
+        "seoTitle": "",
+        "seoDescription": "leche-entera-brik",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "hidden.midiadia",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              },
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "hidden.midiadia",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          },
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080596_001.jpg?t=20250522091502",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080596_002.jpg?t=20250522091502",
+          "order": 2,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080596_003.jpg?t=20250522091502",
+          "order": 3,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 0.96,
+              "centUnitAmount": 0.96
+            }
+          }
+        ],
+        "taxPercentage": 4,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 L",
+        "minimumUnit": 1,
+        "maximumUnit": 90,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 2076,
+          "name": "Entera",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    },
+    {
+      "id": 5932,
+      "productType": 1,
+      "code": "7080604",
+      "ean": "8414807514219",
+      "type": "product",
+      "productData": {
+        "name": "Leche Semidesnatada Brik",
+        "brand": {
+          "id": "CONSUM",
+          "name": "CONSUM",
+          "url": "consum",
+          "landing": false
+        },
+        "url": "https://tienda.consum.es/es/p/leche-semidesnatada-brik/7080604",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080604.jpg?t=20260812080202",
+        "description": "Leche Semidesnatada Brik 1 L",
+        "seo": "leche-semidesnatada-brik",
+        "seoTitle": "",
+        "seoDescription": "leche-semidesnatada-brik",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "hidden.midiadia",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              },
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "hidden.midiadia",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          },
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080604_001.jpg?t=20250522091502",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080604_002.jpg?t=20250522091502",
+          "order": 2,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080604_003.jpg?t=20250522091502",
+          "order": 3,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 0.83,
+              "centUnitAmount": 0.83
+            }
+          }
+        ],
+        "taxPercentage": 4,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 L",
+        "minimumUnit": 1,
+        "maximumUnit": 60,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 2075,
+          "name": "Semidesnatada",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    },
+    {
+      "id": 5645,
+      "productType": 1,
+      "code": "7046597",
+      "ean": "8414807300089",
+      "type": "product",
+      "productData": {
+        "name": "Leche Calcio Semidesnatada Brik",
+        "brand": {
+          "id": "CONSUM",
+          "name": "CONSUM",
+          "url": "consum",
+          "landing": false
+        },
+        "url": "https://tienda.consum.es/es/p/leche-calcio-semidesnatada-brik/7046597",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7046597.jpg?t=20260812080154",
+        "description": "Leche Calcio Semidesnatada Brik 1 L",
+        "seo": "leche-calcio-semidesnatada-brik",
+        "seoTitle": "",
+        "seoDescription": "leche-calcio-semidesnatada-brik",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "hidden.midiadia",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              },
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "hidden.midiadia",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          },
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7046597_001.jpg?t=20230823040001",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7046597_002.jpg?t=20201111083003",
+          "order": 2,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7046597_003.jpg?t=20201111083003",
+          "order": 3,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 1.05,
+              "centUnitAmount": 1.05
+            }
+          }
+        ],
+        "taxPercentage": 4,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 L",
+        "minimumUnit": 1,
+        "maximumUnit": 49,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 2082,
+          "name": "Leche con calcio",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    },
+    {
+      "id": 43662,
+      "productType": 1,
+      "code": "7461007",
+      "ean": "8410285311364",
+      "type": "product",
+      "productData": {
+        "name": "Leche Calcio Colágeno Desnatada",
+        "brand": {
+          "id": "PULEVA",
+          "name": "PULEVA",
+          "url": "puleva",
+          "landing": false
+        },
+        "url": "https://tienda.consum.es/es/p/leche-calcio-colageno-desnatada/7461007",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7461007.jpg?t=20260827104903",
+        "description": "Leche Calcio Colágeno Desnatada 1 L",
+        "seo": "leche-calcio-colageno-desnatada",
+        "seoTitle": "",
+        "seoDescription": "leche-calcio-colageno-desnatada",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["0"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["0"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": true,
+        "actions": [
+          {
+            "key": "adbutler_eligible_url",
+            "value": "https://servedbyadbutler.com/adserve/;MID=185979;type=e959fb862;placementID=3481986;setID=724476;channelID=0;CID=1685594;BID=524376849;TAID=0;place=0;rnd=5063059018;psrtype=api;matches=%5B%22leche%22%5D;referrer=;request_uuid=180f6c90-385c-4181-8c52-5391b3187897;mt=1794384693011559;hc=70e6d0675bab7fb900d89330936f51cf4c1d3400"
+          },
+          {
+            "key": "adbutler_redirect_url",
+            "value": "https://servedbyadbutler.com/redirect.spark?MID=185979&plid=3481986&setID=724476&channelID=0&CID=1685594&scheduleID=3663874&placementScheduleId=3663874&adItemScheduleId=0&banID=524376849&PID=0&textadID=0&tc=1&type=tclickcb&matches=%5B%22leche%22%5D&spr=1&request_uuid=180f6c90-385c-4181-8c52-5391b3187897&mt=1&hc=fb6c14522c90ddd60f00fdf8ded5b23b6dee4ee6&location=1"
+          },
+          {
+            "key": "adbutler_viewable_url",
+            "value": "https://servedbyadbutler.com/adserve/;MID=185979;type=v959fb862;placementID=3481986;setID=724476;channelID=0;CID=1685594;BID=524376849;TAID=0;place=0;rnd=5063059018;psrtype=api;matches=%5B%22leche%22%5D;referrer=;request_uuid=180f6c90-385c-4181-8c52-5391b3187897;mt=1794384693011553;hc=4564bf67704076e95951b15e5f01d0920911b07d"
+          },
+          {
+            "key": "adbutler_accupixel_url",
+            "value": "https://servedbyadbutler.com/adserve/;ID=185979;size=1x1;type=p959fb862;setID=724476;plid=3481986;BID=524376849;place=0;rnd=5063059018;psrtype=json;matches=%5B%22leche%22%5D;metadata=%5B%5D;request_uuid=180f6c90-385c-4181-8c52-5391b3187897;currency=EUR;mt=1794384693011548;hc=ead7ec817c9051dbd3f995dbdde2f2909640d203;rnd=4240481"
+          },
+          {
+            "key": "adbutler_track_url",
+            "value": "https://servedbyadbutler.com/convtrack.spark?MID=185979&ad_item_id=524376849&placement_id=3481986&timestamp=0&zone_id=724476&conversion_type=single-ad&productID=7461007"
+          }
+        ],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7461007_001.jpg?t=20250701091503",
+          "order": 1,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 1.69,
+              "centUnitAmount": 1.69
+            }
+          }
+        ],
+        "taxPercentage": 10,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 L",
+        "minimumUnit": 1,
+        "maximumUnit": 49,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 2082,
+          "name": "Leche con calcio",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    },
+    {
+      "id": 15435,
+      "productType": 1,
+      "code": "7260409",
+      "ean": "8414807538956",
+      "type": "product",
+      "productData": {
+        "name": "Leche sin Lactosa Entera Brik",
+        "brand": {
+          "id": "CONSUM",
+          "name": "CONSUM",
+          "url": "consum",
+          "landing": false
+        },
+        "url": "https://tienda.consum.es/es/p/leche-sin-lactosa-entera-brik/7260409",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7260409.jpg?t=20260812080249",
+        "description": "Leche sin Lactosa Entera Brik 1 L",
+        "seo": "leche-sin-lactosa-entera-brik",
+        "seoTitle": "",
+        "seoDescription": "leche-sin-lactosa-entera-brik",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "hidden.midiadia",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              },
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "hidden.midiadia",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          },
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7260409_001.jpg?t=20250618130001",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7260409_002.jpg?t=20250618130001",
+          "order": 2,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7260409_003.jpg?t=20250618130001",
+          "order": 3,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 1.03,
+              "centUnitAmount": 1.03
+            }
+          }
+        ],
+        "taxPercentage": 4,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 L",
+        "minimumUnit": 1,
+        "maximumUnit": 49,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 2090,
+          "name": "Leches especiales",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    },
+    {
+      "id": 5646,
+      "productType": 1,
+      "code": "7046600",
+      "ean": "8414807300096",
+      "type": "product",
+      "productData": {
+        "name": "Leche Calcio Desnatada Brik",
+        "brand": {
+          "id": "CONSUM",
+          "name": "CONSUM",
+          "url": "consum",
+          "landing": false
+        },
+        "url": "https://tienda.consum.es/es/p/leche-calcio-desnatada-brik/7046600",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7046600.jpg?t=20260812080154",
+        "description": "Leche Calcio Desnatada Brik 1 L",
+        "seo": "leche-calcio-desnatada-brik",
+        "seoTitle": "",
+        "seoDescription": "leche-calcio-desnatada-brik",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "hidden.midiadia",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              },
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "hidden.midiadia",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          },
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7046600_001.jpg?t=20230809040001",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7046600_002.jpg?t=20230809040001",
+          "order": 2,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7046600_003.jpg?t=20230809040001",
+          "order": 3,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 1.02,
+              "centUnitAmount": 1.02
+            }
+          }
+        ],
+        "taxPercentage": 4,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 L",
+        "minimumUnit": 1,
+        "maximumUnit": 49,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 2082,
+          "name": "Leche con calcio",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    }
+  ]
+}
