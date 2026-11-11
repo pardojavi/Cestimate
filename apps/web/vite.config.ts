@@ -8,8 +8,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // En desarrollo la API corre en otro puerto; en producción se
-      // configura la URL completa desde Ajustes.
+      // En desarrollo la API corre en otro puerto; en producción la URL
+      // viene del build (apps/web/.env.production → VITE_API_URL).
       "/api": { target: "http://localhost:8787", changeOrigin: true },
     },
   },

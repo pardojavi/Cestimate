@@ -19,7 +19,7 @@ Cestimate es una webapp (mobile-first, pensada para iPhone) para comparar el pre
 | **Historial** | Guarda «fotos» de precios con fecha y descripción; compara el precio guardado con el actual.                                                                         |
 | **Tiendas**   | Alta/edición/baja de tiendas, activar/desactivar y productos manuales con URL de verificación. Desde su cabecera se abre **Ajustes**.                                |
 
-**Ajustes** no es pestaña: se abre con el botón de la cabecera de Tiendas. Contiene código postal, antigüedad de la caché (radiogroup 6/12/24 h), URL de la API (para GitHub Pages), borrado de caché, reindexación y la cobertura de cada tienda.
+**Ajustes** no es pestaña: se abre con el botón de la cabecera de Tiendas. Contiene código postal, antigüedad de la caché (radiogroup 6/12/24 h), borrado de caché, reindexación y la cobertura de cada tienda.
 
 ## Requisitos
 
@@ -77,7 +77,7 @@ La web es **estática** (GitHub Pages) y la API corre en un servidor con Node y 
    - Configura `CORS_ORIGIN=https://TU-USUARIO.github.io`.
 2. **Web en GitHub Pages** — El workflow `.github/workflows/deploy.yml` compila, testea y publica `apps/web/dist` en Pages en cada push a `main`:
    - En el repo: _Settings → Pages → Source: GitHub Actions_.
-   - Tras el primer despliegue, abre la app → **Ajustes → URL de la API** y pega la URL de tu API (p. ej. `https://cestimate-api.onrender.com`). Se guarda en el dispositivo (`localStorage`).
+   - La URL de la API va **incorporada en el build**: está en `apps/web/.env.production` (`VITE_API_URL`). El usuario no configura nada; si cambias de servidor, actualiza ese archivo y haz push.
 3. `vite.config.ts` usa `base: './'`, así que funciona bajo `/cestimate/` sin configuración extra.
 
 ## Añadir una tienda nueva

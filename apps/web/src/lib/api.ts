@@ -16,19 +16,14 @@ import type {
 /* Cliente HTTP                                                        */
 /* ------------------------------------------------------------------ */
 
-const CLAVE_API = "cestimate.apiBase";
-
 /**
- * Base de la API. En desarrollo se usa el proxy de Vite; en producción
- * (GitHub Pages) la URL se guarda en Ajustes → «URL de la API».
+ * Base de la API, incorporada en el propio build (archivo
+ * `apps/web/.env.production` → variable `VITE_API_URL`). En desarrollo
+ * queda vacía y las peticiones `/api` van al proxy de Vite. El usuario no
+ * tiene que configurar nada.
  */
 export function obtenerBaseApi(): string {
-  const guardado = localStorage.getItem(CLAVE_API);
-  return guardado ? guardado.replace(/\/$/, "") : "";
-}
-
-export function guardarBaseApi(url: string): void {
-  localStorage.setItem(CLAVE_API, url.trim().replace(/\/$/, ""));
+  return (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 }
 
 export class ErrorApi extends Error {}
@@ -46,7 +41,7 @@ export async function pedir<T>(
     });
   } catch {
     throw new ErrorApi(
-      "No se puede contactar con la API. Revisa la URL en Ajustes y que el servidor esté en marcha.",
+      "No se puede contactar con el servidor de Cestimate. Si hace poco que no lo usas, puede estar arrancando (~1 min): inténtalo de nuevo.",
     );
   }
   const datos = (await respuesta.json().catch(() => null)) as {

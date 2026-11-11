@@ -4,8 +4,8 @@
 #   1. Crea una cuenta en https://render.com con tu GitHub (pardojavi).
 #   2. New → Blueprint → conecta el repo pardojavi/Cestimate.
 #   3. Render detecta este archivo y crea el servicio. Espera el primer deploy.
-#   4. Copia la URL pública (https://cestimate-api.onrender.com) y pégala en
-#      la app: Ajustes → URL de la API → «Guardar y conectar».
+#   4. La web ya apunta a esta API (VITE_API_URL en apps/web/.env.production):
+#      solo abre https://pardojavi.github.io/Cestimate/ y busca.
 #
 # Plan gratis: la instancia se duerme tras ~15 min sin uso (el primer arranque
 # tarda ~50 s) y el disco es efímero (la BD se regenera, pero las cestas

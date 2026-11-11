@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { Eraser, Globe, MapPin, RefreshCw, Server } from "lucide-react";
+import { Eraser, Globe, MapPin, RefreshCw } from "lucide-react";
 import {
-  guardarBaseApi,
-  obtenerBaseApi,
   useAjustes,
   useBorrarCache,
   useGuardarAjustes,
@@ -15,7 +13,8 @@ const OPCIONES_TTL = [6, 12, 24];
 /**
  * Ajustes (agent.md §3.7 + ESTILOS.md §8): no es pestaña; se abre desde
  * Tiendas. Tarjetas: Ubicación, Antigüedad (radiogroup), Datos (borrar
- * caché), URL de la API (necesaria en GitHub Pages) y mantenimiento.
+ * caché) y mantenimiento. La URL de la API no se configura aquí: va
+ * incorporada en el build (VITE_API_URL).
  */
 export default function Ajustes() {
   const { data: ajustes } = useAjustes();
@@ -25,8 +24,6 @@ export default function Ajustes() {
 
   const [postal, setPostal] = useState("");
   const [ttl, setTtl] = useState(12);
-  const [urlApi, setUrlApi] = useState("");
-  const [guardadoUrl, setGuardadoUrl] = useState(false);
 
   useEffect(() => {
     if (ajustes) {
@@ -34,18 +31,6 @@ export default function Ajustes() {
       setTtl(ajustes.ttlHours);
     }
   }, [ajustes]);
-
-  useEffect(() => {
-    setUrlApi(obtenerBaseApi());
-  }, []);
-
-  function guardarUrl() {
-    guardarBaseApi(urlApi);
-    setGuardadoUrl(true);
-    setTimeout(() => setGuardadoUrl(false), 2500);
-    // Recarga para que las queries usen la nueva base.
-    window.location.reload();
-  }
 
   return (
     <section aria-label="Ajustes">
@@ -125,41 +110,6 @@ export default function Ajustes() {
             </button>
           ))}
         </div>
-      </div>
-
-      {/* URL de la API — necesaria cuando la web está publicada en GitHub Pages */}
-      <div className="tarjeta">
-        <h3>
-          <Server size={15} aria-hidden /> URL de la API
-        </h3>
-        <p className="subtitulo">
-          Cuando usas Cestimate desde GitHub Pages, la web necesita una API
-          desplegada en la nube. Pega aquí su dirección (por ejemplo
-          <code> https://cestimate-api.onrender.com</code>).
-        </p>
-        <label className="campo">
-          <span>Dirección</span>
-          <input
-            type="url"
-            inputMode="url"
-            placeholder="http://localhost:8787"
-            value={urlApi}
-            onChange={(e) => setUrlApi(e.target.value)}
-          />
-        </label>
-        <button className="btn primario" onClick={guardarUrl}>
-          Guardar y conectar
-        </button>
-        {guardadoUrl && (
-          <span className="badge mejor" style={{ marginLeft: 8 }}>
-            guardado
-          </span>
-        )}
-        {!urlApi && (
-          <p className="producto__meta">
-            Sin URL configurada se usa el servidor local (desarrollo).
-          </p>
-        )}
       </div>
 
       {/* Datos: borrar caché y reindexar */}
