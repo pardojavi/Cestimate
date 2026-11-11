@@ -36,8 +36,13 @@ export async function pedir<T>(
   let respuesta: Response;
   try {
     respuesta = await fetch(`${base}${ruta}`, {
-      headers: { "Content-Type": "application/json" },
       ...opciones,
+      // Content-Type solo si hay cuerpo: Fastify rechaza un body vacío con
+      // application/json (afectaba a DELETE y a POST sin datos).
+      headers: {
+        ...(opciones.body ? { "Content-Type": "application/json" } : {}),
+        ...opciones.headers,
+      },
     });
   } catch {
     throw new ErrorApi(

@@ -21,6 +21,24 @@ async function main(): Promise<void> {
     origin: config.corsOrigin === "*" ? true : config.corsOrigin.split(","),
   });
 
+  // Acepta POST/PUT/DELETE sin cuerpo aunque envíen content-type JSON
+  // (los clientes antiguos lo hacían; Fastify lo rechazaba con 400).
+  app.addContentTypeParser(
+    "application/json",
+    { parseAs: "string" },
+    (_req, cuerpo, done) => {
+      if (!cuerpo || cuerpo.trim() === "") return done(null, undefined);
+      try {
+        done(null, JSON.parse(cuerpo));
+      } catch {
+        done(
+          Object.assign(new Error("JSON no válido."), { statusCode: 400 }),
+          undefined,
+        );
+      }
+    },
+  );
+
   // Abre SQLite y siembra las tiendas predefinidas antes de servir.
   abrirDB();
 
@@ -34,9 +52,20 @@ async function main(): Promise<void> {
   app.get("/api/health", async () => ({ ok: true, name: "Cestimate" }));
 
   // Errores no capturados: respuesta JSON limpia, sin stack al cliente.
+  // Se respeta el código original (4xx = petición inválida, p. ej. cuerpo
+  // vacío) y el 500 se reserva para fallos reales del servidor.
   app.setErrorHandler((error, _request, reply) => {
-    app.log.error(error);
-    reply.code(500).send({ error: "Error interno de la API." });
+    const codigo =
+      error.statusCode && error.statusCode >= 400 && error.statusCode < 500
+        ? error.statusCode
+        : 500;
+    if (codigo >= 500) app.log.error(error);
+    else app.log.warn(error);
+    reply
+      .code(codigo)
+      .send({
+        error: codigo >= 500 ? "Error interno de la API." : error.message,
+      });
   });
 
   await app.listen({ port: config.port, host: "0.0.0.0" });
