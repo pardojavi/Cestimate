@@ -1,9 +1,10 @@
 import {
   aISO,
+  coincideFlex,
+  tokenizar,
   zLidlJsonLd,
   type LidlJsonLd,
   type StoreProduct,
-  normalizar,
 } from "@cestimate/shared";
 import { ErrorTienda, esperar, pedir, pedirJSON } from "../lib/http.js";
 import { guardarProducto, type DB } from "../lib/db.js";
@@ -193,15 +194,13 @@ export function crearLidl(base: DB): StoreAdapter {
     id: "lidl",
 
     async search(query: string, ctx: Contexto): Promise<StoreProduct[]> {
-      const terminos = normalizar(query).split(/\s+/).filter(Boolean);
+      const terminos = tokenizar(query);
       if (terminos.length === 0) return [];
 
       const entradas = await cargarSitemap();
-      // Candidatos: el slug de la URL contiene todos los términos.
-      const candidatas = entradas.filter((e) => {
-        const slug = normalizar(e.slug);
-        return terminos.every((t) => slug.includes(t));
-      });
+      // Candidatos: el slug de la URL coincide de forma flexible (los
+      // términos cortos, como «1 l», no se exigen literalmente).
+      const candidatas = entradas.filter((e) => coincideFlex(e.slug, terminos));
       if (candidatas.length === 0) return [];
 
       // Primero los que ya tenemos cacheados; luego leemos un máximo de páginas.

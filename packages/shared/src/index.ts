@@ -181,6 +181,18 @@ export const zConsumResponse = z.object({
       id: z.union([z.string(), z.number()]),
       code: z.string().optional(),
       ean: z.string().nullable().optional(),
+      // `productData.imageURL` está caducada (404); las URLs válidas están
+      // en `media[].url` (verificado en vivo 2026-11-11).
+      media: z
+        .array(
+          z.object({
+            url: z.string(),
+            order: z.number().optional(),
+            type: z.string().optional(),
+          }),
+        )
+        .nullable()
+        .optional(),
       productData: z.object({
         name: z.string(),
         description: z.string().nullable().optional(),
@@ -282,6 +294,39 @@ export function normalizar(texto: string): string {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
+}
+
+/**
+ * Tokeniza una consulta de búsqueda: normaliza, parte por espacios y separa
+ * los tokens que mezclan letras y cifras («1l» → «1», «l») para que las
+ * unidades no se exijan como texto literal.
+ */
+export function tokenizar(texto: string): string[] {
+  return normalizar(texto)
+    .split(/\s+/)
+    .filter(Boolean)
+    .flatMap((t) => t.match(/[a-z]+|[0-9]+/g) ?? [t]);
+}
+
+/**
+ * Términos que se exigen en un texto: los de 2+ caracteres («leche»,
+ * «entera»). Los términos cortos («1», «l») suelen ser ruido de formato y
+ * solo puntúan; si la consulta no tiene ninguno de 2+, se exigen todos.
+ */
+export function terminosExigidos(terminos: string[]): string[] {
+  const largos = terminos.filter((t) => t.length >= 2);
+  return largos.length > 0 ? largos : terminos;
+}
+
+/**
+ * ¿Coincide el texto con la consulta de forma flexible? Se exigen todos los
+ * términos relevantes (sin obligar a que aparezcan números o unidades), lo
+ * que permite encontrar «Leche Entera Brik» con la consulta «leche entera 1 l».
+ */
+export function coincideFlex(texto: string, terminos: string[]): boolean {
+  if (terminos.length === 0) return false;
+  const norm = normalizar(texto);
+  return terminosExigidos(terminos).every((t) => norm.includes(t));
 }
 
 /** Divisa es-ES. */

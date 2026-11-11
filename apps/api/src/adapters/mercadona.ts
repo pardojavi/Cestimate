@@ -1,4 +1,10 @@
-import { aISO, zMercadonaCategory, type StoreProduct } from "@cestimate/shared";
+import {
+  aISO,
+  tokenizar,
+  terminosExigidos,
+  zMercadonaCategory,
+  type StoreProduct,
+} from "@cestimate/shared";
 import { config } from "../config.js";
 import { ErrorTienda, esperar, pedirJSON } from "../lib/http.js";
 import {
@@ -216,18 +222,16 @@ export function crearMercadona(base: DB): StoreAdapter {
     },
 
     async search(query: string, ctx: Contexto): Promise<StoreProduct[]> {
-      const terminos = query
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(Boolean);
+      const terminos = tokenizar(query);
       if (terminos.length === 0) return [];
 
-      const condiciones = terminos
+      // Solo se exigen los términos relevantes (2+ caracteres): los números
+      // y unidades («1 l») no deben aparecer literalmente en el nombre.
+      const exigidos = terminosExigidos(terminos);
+      const condiciones = exigidos
         .map(() => "p.name_norm LIKE ?")
         .join(" AND ");
-      const parametros = terminos.map((t) => `%${t}%`);
+      const parametros = exigidos.map((t) => `%${t}%`);
       const filas = base
         .prepare(
           `SELECT p.id, p.store_id, p.external_id, p.name, p.format, p.image_url, p.url,

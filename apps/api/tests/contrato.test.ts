@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  coincideFlex,
+  tokenizar,
+  terminosExigidos,
   zAldiResponse,
   zConsumResponse,
   zLidlJsonLd,
@@ -112,6 +115,24 @@ describe("Consum", () => {
     const leche = convertidos.find((p) => /semidesnatada/i.test(p.name));
     expect(leche?.price).toBeCloseTo(0.83, 2);
   });
+
+  it("usa la imagen de `media` (la de productData.imageURL está caducada)", () => {
+    const datos = leer<unknown>("consum-search.json");
+    const parseado = zConsumResponse.safeParse(datos);
+    if (!parseado.success) throw new Error("fixture inválido");
+
+    const conMedia = parseado.data.products.find(
+      (p) => (p.media?.length ?? 0) > 0,
+    );
+    expect(conMedia).toBeDefined();
+
+    const sp = consumProducto(conMedia!);
+    expect(sp).not.toBeNull();
+    // La URL válida lleva el sufijo de `media` (…_001.jpg); imageURL (404)
+    // termina en …/{code}.jpg.
+    expect(sp!.imageUrl).toContain("_001.jpg");
+    expect(sp!.imageUrl).toContain("cdn-consum.aktiosdigitalservices.com");
+  });
 });
 
 describe("Aldi", () => {
@@ -182,6 +203,39 @@ describe("Lidl", () => {
     expect(
       lidlProducto(ld as never, "https://www.lidl.es/p/x/p1", "1"),
     ).toBeNull();
+  });
+});
+
+describe("Búsqueda flexible", () => {
+  it("tokeniza separando letras y cifras («1l» → «1», «l»)", () => {
+    expect(tokenizar("Leche Entera 1L")).toEqual(["leche", "entera", "1", "l"]);
+    expect(tokenizar("  Tomate  Frito ")).toEqual(["tomate", "frito"]);
+    expect(tokenizar("arándano 500gr")).toEqual(["arandano", "500", "gr"]);
+    expect(tokenizar("")).toEqual([]);
+  });
+
+  it("exige solo los términos de 2+ caracteres", () => {
+    expect(terminosExigidos(["leche", "entera", "1", "l"])).toEqual([
+      "leche",
+      "entera",
+    ]);
+    // Si no hay ninguno relevante, se exigen todos.
+    expect(terminosExigidos(["1", "l"])).toEqual(["1", "l"]);
+  });
+
+  it("encuentra el producto aunque la consulta lleve tamaño y unidad", () => {
+    const terminos = tokenizar("leche entera 1 l");
+    expect(coincideFlex("Leche Entera Brik", terminos)).toBe(true);
+    expect(coincideFlex("Leche Semidesnatada Brik", terminos)).toBe(false);
+    expect(coincideFlex("Tomate frito", terminos)).toBe(false);
+  });
+
+  it("no exige el número suelto cuando el nombre no lo trae", () => {
+    // Caso de la pestaña Cesta: «leche entera 1 l» vs. «Leche Entera Brik».
+    expect(
+      coincideFlex("Leche Entera Brik", tokenizar("leche entera 1l")),
+    ).toBe(true);
+    expect(coincideFlex("", tokenizar(""))).toBe(false);
   });
 });
 

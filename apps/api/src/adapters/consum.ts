@@ -1,4 +1,6 @@
 import {
+  coincideFlex,
+  tokenizar,
   zConsumResponse,
   type ConsumProduct,
   type ConsumResponse,
@@ -45,6 +47,14 @@ export function aStoreProduct(p: ConsumProduct): StoreProduct | null {
         ? "L"
         : (extraido?.unitPriceUnit ?? null);
 
+  // Imagen: `productData.imageURL` está caducada (404); la válida es la
+  // primera de `media` (tipo «P» = producto). Fallback por si lo cambian.
+  const imagen =
+    p.media?.find((m) => m.type === "P")?.url ??
+    p.media?.[0]?.url ??
+    p.productData.imageURL ??
+    null;
+
   return {
     storeId: "consum",
     externalId: String(p.code ?? p.id),
@@ -55,7 +65,7 @@ export function aStoreProduct(p: ConsumProduct): StoreProduct | null {
       extraido && extraido.cantidad > 0 && unit
         ? { value: euros / extraido.cantidad, unit }
         : null,
-    imageUrl: p.productData.imageURL ?? null,
+    imageUrl: imagen,
     url: p.productData.url,
     fetchedAt: new Date().toISOString(),
   };
@@ -83,12 +93,7 @@ export function crearConsum(base: DB): StoreAdapter {
     id: "consum",
 
     async search(query: string, ctx: Contexto): Promise<StoreProduct[]> {
-      const terminos = query
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(Boolean);
+      const terminos = tokenizar(query);
       if (terminos.length === 0) return [];
 
       const resultados: StoreProduct[] = [];
@@ -97,12 +102,10 @@ export function crearConsum(base: DB): StoreAdapter {
         for (const p of datos.products) {
           const sp = aStoreProduct(p);
           if (!sp) continue;
-          const norm = sp.name
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .toLowerCase();
-          // Consum hace coincidencias laxas: filtramos AND en local.
-          if (terminos.every((t) => norm.includes(t))) {
+          // Consum hace coincidencias laxas: filtramos en local de forma
+          // flexible (nombre + descripción, sin exigir números ni unidades).
+          const texto = `${sp.name} ${p.productData.description ?? ""}`;
+          if (coincideFlex(texto, terminos)) {
             resultados.push(sp);
           }
         }

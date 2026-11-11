@@ -2,6 +2,8 @@ import type { FastifyInstance } from "fastify";
 import { createHash } from "node:crypto";
 import {
   aISO,
+  tokenizar,
+  terminosExigidos,
   type StoreProduct,
   type StoreSearchResult,
 } from "@cestimate/shared";
@@ -276,13 +278,12 @@ function buscarManual(
   storeId: string,
   consulta: string,
 ): StoreProduct[] {
-  const terminos = consulta
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean);
-  const condiciones = terminos.map(() => "p.name_norm LIKE ?").join(" AND ");
+  const terminos = tokenizar(consulta);
+  if (terminos.length === 0) return [];
+  // Solo se exigen los términos relevantes (2+ caracteres); «1 l» no debe
+  // aparecer literalmente en el nombre.
+  const exigidos = terminosExigidos(terminos);
+  const condiciones = exigidos.map(() => "p.name_norm LIKE ?").join(" AND ");
   const filas = base
     .prepare(
       `SELECT p.external_id, p.name, p.format, p.image_url, p.url,
@@ -296,7 +297,7 @@ function buscarManual(
        WHERE p.store_id = ? AND ${condiciones}
        ORDER BY s.price ASC LIMIT 30`,
     )
-    .all(storeId, ...terminos.map((t) => `%${t}%`)) as {
+    .all(storeId, ...exigidos.map((t) => `%${t}%`)) as {
     external_id: string;
     name: string;
     format: string | null;

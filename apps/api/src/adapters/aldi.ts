@@ -1,4 +1,6 @@
 import {
+  coincideFlex,
+  tokenizar,
   zAldiResponse,
   type AldiHit,
   type StoreProduct,
@@ -102,22 +104,17 @@ export function crearAldi(base: DB): StoreAdapter {
         );
       }
 
-      const terminos = query
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(Boolean);
+      const terminos = tokenizar(query);
+      if (terminos.length === 0) return [];
 
       const productos: StoreProduct[] = [];
       for (const hit of parseado.data.hits) {
         const sp = aStoreProduct(hit);
         if (!sp) continue;
-        const norm = sp.name
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase();
-        if (terminos.every((t) => norm.includes(t))) {
+        // Filtro flexible sobre nombre y marca (sin exigir números ni
+        // unidades: «leche entera 1 l» ha de encontrar «Leche Entera Brik»).
+        const texto = `${sp.name} ${hit.brandName ?? ""}`;
+        if (coincideFlex(texto, terminos)) {
           productos.push(sp);
         }
       }
