@@ -18,7 +18,9 @@ services:
     runtime: node
     plan: free
     healthCheckPath: /api/health
-    buildCommand: npm ci --include=dev
+    # --ignore-scripts: better-sqlite3 trae prebuilds listos (no compila) y el
+    # gyp sintético de npm falla sin toolchain. Validado: tests 19/19 + build.
+    buildCommand: npm ci --ignore-scripts --include=dev
     startCommand: npm run start -w apps/api
     envVars:
       - key: NODE_VERSION
