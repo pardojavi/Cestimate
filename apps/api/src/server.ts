@@ -27,9 +27,10 @@ async function main(): Promise<void> {
     "application/json",
     { parseAs: "string" },
     (_req, cuerpo, done) => {
-      if (!cuerpo || cuerpo.trim() === "") return done(null, undefined);
+      const texto = typeof cuerpo === "string" ? cuerpo : String(cuerpo ?? "");
+      if (texto.trim() === "") return done(null, undefined);
       try {
-        done(null, JSON.parse(cuerpo));
+        done(null, JSON.parse(texto));
       } catch {
         done(
           Object.assign(new Error("JSON no válido."), { statusCode: 400 }),
@@ -55,17 +56,21 @@ async function main(): Promise<void> {
   // Se respeta el código original (4xx = petición inválida, p. ej. cuerpo
   // vacío) y el 500 se reserva para fallos reales del servidor.
   app.setErrorHandler((error, _request, reply) => {
+    const e = error as { statusCode?: number; message?: string };
     const codigo =
-      error.statusCode && error.statusCode >= 400 && error.statusCode < 500
-        ? error.statusCode
+      typeof e.statusCode === "number" &&
+      e.statusCode >= 400 &&
+      e.statusCode < 500
+        ? e.statusCode
         : 500;
     if (codigo >= 500) app.log.error(error);
     else app.log.warn(error);
-    reply
-      .code(codigo)
-      .send({
-        error: codigo >= 500 ? "Error interno de la API." : error.message,
-      });
+    reply.code(codigo).send({
+      error:
+        codigo >= 500
+          ? "Error interno de la API."
+          : (e.message ?? "Petición no válida."),
+    });
   });
 
   await app.listen({ port: config.port, host: "0.0.0.0" });
