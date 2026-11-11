@@ -11,7 +11,8 @@ const PUERTO = 9333;
 const PERFIL = "/tmp/cestimate-chrome-perfil";
 const SALIDA =
   "/private/var/folders/h3/032qrmdj6j9f1_lpg94b7fx00c0c_z/T/opencode";
-const URL_APP = "http://localhost:5173/";
+const URL_APP = process.argv[2] || "http://localhost:5173/";
+const SOLO_INICIAL = process.argv.includes("--solo-inicial");
 
 rmSync(PERFIL, { recursive: true, force: true });
 mkdirSync(SALIDA, { recursive: true });
@@ -114,6 +115,10 @@ async function main() {
 
   await medir("carga inicial");
   await capturar("p1_buscar");
+  if (SOLO_INICIAL) {
+    ws.close();
+    return;
+  }
   await dormir(2500);
   await medir("2,5 s después");
   await capturar("p1b_buscar");
