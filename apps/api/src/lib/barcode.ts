@@ -84,7 +84,14 @@ export function aIdentificacion(
   }
 
   const p = parseado.data.product;
-  const nombre = (p.product_name_es ?? p.product_name ?? "").trim() || null;
+  // OFF envía `product_name_es: ""` (cadena vacía, no ausente) cuando el
+  // producto no está traducido: con `??` no caería a `product_name` y el
+  // producto quedaría «conocido pero sin nombre». Se descartan también los
+  // vacíos y los que solo contienen espacios.
+  const nombre =
+    [p.product_name_es, p.product_name]
+      .map((n) => (n ?? "").trim())
+      .find(Boolean) ?? null;
   const marca = (p.brands ?? "").split(",")[0]?.trim() || null;
   const consulta = [nombre, marca].filter(Boolean).join(" ").trim() || null;
 

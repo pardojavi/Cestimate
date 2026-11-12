@@ -375,6 +375,35 @@ describe("Open Food Facts (identificación por código de barras)", () => {
     expect(ident.marca).toBe("MERCADONA");
     expect(ident.consulta).toBe("Leche Entera MERCADONA");
   });
+
+  it("usa product_name cuando product_name_es viene como cadena vacía", () => {
+    // OFF envía "" (no ausente) cuando no hay traducción: sin este caso el
+    // producto quedaría «conocido pero sin nombre» y la web no buscaría.
+    const ident = aIdentificacion("2000000000001", {
+      status: 1,
+      product: {
+        product_name: "Spiruline",
+        product_name_es: "",
+        brands: "Les Hauts de Montrouge",
+      },
+    });
+    expect(ident.nombre).toBe("Spiruline");
+    expect(ident.encontrado).toBe(true);
+    expect(ident.consulta).toBe("Spiruline Les Hauts de Montrouge");
+  });
+
+  it("con solo marca queda encontrado, sin nombre y con consulta = marca", () => {
+    // Encontrado sin nombre: la web busca por `consulta` (la marca) para
+    // que el chip nunca quede sin búsqueda (bug del chip muerto).
+    const ident = aIdentificacion("4800000000000", {
+      status: 1,
+      product: { product_name: "  ", product_name_es: "", brands: "Hacendado" },
+    });
+    expect(ident.encontrado).toBe(true);
+    expect(ident.nombre).toBeNull();
+    expect(ident.marca).toBe("Hacendado");
+    expect(ident.consulta).toBe("Hacendado");
+  });
 });
 
 describe("Utilidades de formato", () => {

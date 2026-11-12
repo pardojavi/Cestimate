@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import {
+  terminoDeBusqueda,
   useAnadirArticulo,
   useBusqueda,
   useIdentificarCodigo,
@@ -72,13 +73,16 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
     identificar.mutate(codigo, {
       onSuccess: (ident) => {
         setIdentificacion(ident);
-        // Se busca solo por el nombre del producto: la marca (p. ej.
-        // «MERCADONA») no aparece en los nombres de las tiendas (usan su
-        // propia marca: Hacendado, Consum…), así que incluirla vaciaría la
-        // búsqueda. La marca se muestra en el chip de transparencia.
-        if (ident.encontrado && ident.nombre) {
-          setTexto(ident.nombre);
-          setConsulta(ident.nombre);
+        // Si hay chip, SIEMPRE se lanza la búsqueda (antes solo ocurría si
+        // había nombre y un producto «conocido pero sin nombre» dejaba el
+        // chip sin resultados ni aviso). `terminoDeBusqueda` pone el nombre
+        // solo —la marca (p. ej. «MERCADONA») no aparece en los nombres de
+        // las tiendas: usan su propia marca: Hacendado, Consum…— o, si OFF
+        // solo conoce la marca, la propia marca (campo editable).
+        const termino = terminoDeBusqueda(ident);
+        if (termino) {
+          setTexto(termino);
+          setConsulta(termino);
           setMostrarEscaneador(false);
         }
         // Si no se encontró, el panel queda abierto: el aviso §6.4 invita a
@@ -242,6 +246,23 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
           </button>
         </div>
       )}
+
+      {identificacion &&
+        identificacion.encontrado &&
+        !identificacion.nombre &&
+        !identificar.isPending && (
+          <div className="aviso warn" role="status">
+            <strong>
+              <AlertTriangle size={16} aria-hidden /> Solo se conoce la marca
+            </strong>
+            <span>
+              Open Food Facts tiene este producto pero sin nombre (solo la marca
+              {identificacion.marca ? ` ${identificacion.marca}` : ""}). Hemos
+              buscado por la marca: completa el nombre en el campo para
+              compararlo entre tiendas.
+            </span>
+          </div>
+        )}
 
       <p className="nota-seccion">
         Precios de la web de cada tienda para tu código postal. Cada uno lleva

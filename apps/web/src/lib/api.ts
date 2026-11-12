@@ -456,6 +456,21 @@ export interface IdentificacionCodigo {
   fechaConsulta: string;
 }
 
+/**
+ * Término de búsqueda para una identificación de código de barras.
+ *
+ * Regla: **si hay chip, hay búsqueda** (nunca un chip sin resultados ni
+ * aviso). Se busca el nombre solo —sin la marca, que no aparece en los
+ * nombres de las tiendas (usan su propia marca: Hacendado, Consum…)— y,
+ * si OFF solo conoce la marca, `consulta` (la propia marca) para que el
+ * campo quede relleno y editable. `null` cuando no hay nada que buscar
+ * (código no reconocido: el aviso §6.4 invita a escribirlo a mano).
+ */
+export function terminoDeBusqueda(ident: IdentificacionCodigo): string | null {
+  if (!ident.encontrado) return null;
+  return (ident.nombre ?? ident.consulta)?.trim() || null;
+}
+
 export function useIdentificarCodigo() {
   return useMutation({
     mutationFn: (codigo: string) =>
