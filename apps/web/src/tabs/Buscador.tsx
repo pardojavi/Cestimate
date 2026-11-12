@@ -45,6 +45,14 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
   const activas = tiendas?.filter((t) => t.active) ?? [];
   const listaMarcados = Object.values(marcados);
 
+  // ¿Hay una consulta en curso? La query está habilitada con ≥2 caracteres
+  // (ver useBusqueda): sin datos y sin error significa que está fetchando o
+  // a punto de hacerlo (el fotograma previo al arranque: isFetching aún
+  // false). Sin esto, el estado vacío parpadearía al pulsar Buscar.
+  const cargando = !data && !isError && consulta.trim().length >= 2;
+  // Para el botón: incluye también los refetch con datos ya en pantalla.
+  const buscando = cargando || isFetching;
+
   // Precio más bajo de toda la respuesta (para la insignia).
   const masBarato = data?.results
     .flatMap((r) => r.products)
@@ -140,8 +148,17 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
             <ScanBarcode size={18} aria-hidden />
           </button>
         </label>
-        <button className="btn primario" type="submit">
-          Buscar
+        {/* No se deshabilita: si la búsqueda tarda, el usuario puede cambiar
+            de consulta (React Query desduplica por clave, así que pulsar
+            dos veces lo mismo no dispara dos peticiones). */}
+        <button className="btn primario" type="submit" aria-busy={buscando}>
+          {buscando ? (
+            <>
+              <Loader2 size={15} aria-hidden className="girar" /> Buscando…
+            </>
+          ) : (
+            "Buscar"
+          )}
         </button>
       </form>
 
@@ -231,6 +248,12 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
         su enlace y la hora de consulta.
       </p>
 
+      {/* Región viva permanente: anuncia el estado de la consulta aunque
+          el contenido visual cambie (los esqueletos son decorativos). */}
+      <span className="visually-hidden" role="status">
+        {isFetching ? "Consultando precios…" : ""}
+      </span>
+
       {isError && (
         <div className="aviso error" role="alert">
           <strong>
@@ -246,11 +269,58 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
         </div>
       )}
 
+      {/* Carga inicial (§6.8): esqueleto por tienda activa con «Consultando…»
+          en la cabecera. Sin esto, la primera búsqueda (que indexa el
+          catálogo de Mercadona y tarda) no daba señal ninguna de trabajo. */}
+      {cargando && (
+        <div className="esqueletos" aria-hidden="true">
+          {activas.length > 0 ? (
+            activas.map((t) => (
+              <div className="grupo-tienda" key={t.id}>
+                <div className="grupo-tienda__cabecera">
+                  <span
+                    className="punto-color"
+                    style={{ background: colorDeTienda(t.id) }}
+                  />
+                  <span className="grupo-tienda__nombre">{t.name}</span>
+                  <span className="grupo-tienda__estado">
+                    <Loader2
+                      size={12}
+                      aria-hidden
+                      className="girar esqueleto__spinner"
+                    />
+                    Consultando…
+                  </span>
+                </div>
+                <div className="grupo-tienda__cuerpo">
+                  {[0, 1, 2].map((i) => (
+                    <div className="esqueleto-fila" key={i}>
+                      <span className="esqueleto-img" />
+                      <span className="esqueleto-texto">
+                        <span className="esqueleto-linea" />
+                        <span className="esqueleto-linea esqueleto-linea--corta" />
+                      </span>
+                      <span className="esqueleto-precio" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="cargando">
+              <Loader2 size={15} aria-hidden className="girar" /> Consultando
+              precios…
+            </div>
+          )}
+        </div>
+      )}
+
       {data && (
         <>
           {isFetching && (
-            <div className="cargando" role="status">
-              <Loader2 size={15} aria-hidden /> Consultando…
+            <div className="cargando">
+              <Loader2 size={15} aria-hidden className="girar" /> Consultando
+              precios…
             </div>
           )}
 
@@ -275,7 +345,7 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
         </>
       )}
 
-      {!data && !isError && (
+      {!data && !cargando && !isError && (
         <div className="vacio">
           Escribe un producto y pulsa <strong>Buscar</strong> para comparar
           precios entre tiendas. También puedes escanear el código de barras con

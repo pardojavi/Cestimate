@@ -312,6 +312,72 @@ button {
   font-size: 14px;
 }
 
+.cargando svg {
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+
+/* --------------------- Esqueletos de búsqueda --------------------- */
+/* §6.8: esqueleto de las filas en --paper-2 con «Consultando…» en la
+   cabecera de cada tienda. Sin animación de brillo: el spinner del
+   cabecera ya indica actividad y respeta prefers-reduced-motion. */
+
+.esqueletos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.grupo-tienda__estado .esqueleto__spinner {
+  vertical-align: -2px;
+  margin-right: 3px;
+}
+
+.esqueleto-fila {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.esqueleto-fila:first-of-type {
+  border-top: 0;
+}
+
+.esqueleto-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--paper-2);
+  flex-shrink: 0;
+}
+
+.esqueleto-texto {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.esqueleto-linea {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--paper-2);
+}
+
+.esqueleto-linea--corta {
+  width: 55%;
+}
+
+.esqueleto-precio {
+  width: 64px;
+  height: 18px;
+  border-radius: 6px;
+  background: var(--paper-2);
+  flex-shrink: 0;
+}
+
 /* ------------------------ Tarjeta de tienda ----------------------- */
 
 .grupo-tienda {
