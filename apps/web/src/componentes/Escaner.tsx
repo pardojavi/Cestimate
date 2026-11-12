@@ -62,13 +62,16 @@ export default function Escaner({
     let cancelado = false;
     let stream: MediaStream | null = null;
     let temporizador: ReturnType<typeof setInterval> | null = null;
+    // true cuando el stream ya no se va a usar (timeout, error o cierre):
+    // evita que una cámara concedida tarde quede encendida sin uso.
+    let obsoleto = false;
 
     setEstado("iniciando");
     setMensaje("");
 
     async function iniciar() {
       // 1. Cámara (guard: mediaDevices solo existe en contextos seguros).
-      //    Límite 45 s: da tiempo al diálogo de permiso de iOS/Safari.
+      //    Límite 30 s: da tiempo al diálogo de permiso de iOS/Safari.
       if (!navigator.mediaDevices?.getUserMedia) {
         setEstado("sin-camara");
         setMensaje(
@@ -76,14 +79,22 @@ export default function Escaner({
         );
         return;
       }
+      const promesaCamara = navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
+      // Si el permiso llega tarde (tras el timeout o al desmontar el panel),
+      // el stream no debe quedar huérfano: la cámara se apaga en cuanto
+      // llega, porque ya no la usamos.
+      void promesaCamara
+        .then((s) => {
+          if (obsoleto) s.getTracks().forEach((t) => t.stop());
+        })
+        .catch(() => undefined);
+
       try {
-        stream = await conLimite(
-          navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" },
-          }),
-          45_000,
-        );
+        stream = await conLimite(promesaCamara, 30_000);
       } catch (error) {
+        obsoleto = true;
         if (cancelado) return;
         const esTimeout =
           error instanceof Error && error.message === "TimeoutError";
@@ -95,17 +106,22 @@ export default function Escaner({
         );
         return;
       }
-      if (cancelado) {
+      if (cancelado || obsoleto) {
         stream.getTracks().forEach((t) => t.stop());
         return;
       }
       const video = videoRef.current;
-      if (!video) return;
+      if (!video) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
       video.srcObject = stream;
       try {
         // Límite 10 s: si no arranca, no bloqueamos el resto del panel.
         await conLimite(video.play(), 10_000);
       } catch {
+        // Sin reproducción no hay escaneo: apagamos la cámara.
+        stream.getTracks().forEach((t) => t.stop());
         if (cancelado) return;
         setEstado("error");
         setMensaje(
@@ -119,6 +135,7 @@ export default function Escaner({
       try {
         detectarRef.current = await conLimite(crearDetector(), 20_000);
       } catch {
+        stream.getTracks().forEach((t) => t.stop());
         if (cancelado) return;
         setEstado("error");
         setMensaje(
@@ -153,6 +170,7 @@ export default function Escaner({
 
     return () => {
       cancelado = true;
+      obsoleto = true;
       if (temporizador) clearInterval(temporizador);
       if (stream) stream.getTracks().forEach((t) => t.stop());
     };
