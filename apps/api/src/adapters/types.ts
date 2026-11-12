@@ -40,30 +40,26 @@ export function normalizarUnidad(
   return null;
 }
 
-/** Extrae tamaño y unidad de un texto tipo "1 L", "500 g", "12 ud". */
-export function extraerFormato(
-  texto: string | null | undefined,
+/** Convierte una cantidad con unidad cruda al par (formato, unidad canónica). */
+function aFormatoPar(
+  cantidad: number,
+  unidadCruda: string,
 ): {
   format: string;
   unitPriceUnit: "kg" | "L" | "ud" | null;
   cantidad: number;
-} | null {
-  if (!texto) return null;
-  const m = texto.match(/(\d+(?:[.,]\d+)?)\s*(l|ml|kg|g|ud|unidades?|u)\b/i);
-  if (!m) return null;
-  const cantidad = Number(m[1]!.replace(",", "."));
-  if (!Number.isFinite(cantidad) || cantidad <= 0) return null;
-  const unidadCruda = m[2]!.toLowerCase();
+} {
   let cantidadFinal = cantidad;
   let unit: "kg" | "L" | "ud" | null = null;
-  if (unidadCruda === "ml") {
+  const u = unidadCruda.toLowerCase();
+  if (u === "ml") {
     cantidadFinal = cantidad / 1000;
     unit = "L";
-  } else if (unidadCruda === "g") {
+  } else if (u === "g" || u.startsWith("gr")) {
     cantidadFinal = cantidad / 1000;
     unit = "kg";
-  } else if (unidadCruda === "l") unit = "L";
-  else if (unidadCruda === "kg") unit = "kg";
+  } else if (u === "l" || u.startsWith("lt")) unit = "L";
+  else if (u.startsWith("k")) unit = "kg";
   else unit = "ud";
   const sufijo = unit === "L" ? "L" : unit === "kg" ? "kg" : "ud";
   return {
@@ -71,4 +67,39 @@ export function extraerFormato(
     unitPriceUnit: unit,
     cantidad: cantidadFinal,
   };
+}
+
+/**
+ * Extrae tamaño y unidad de un texto tipo "1 L", "500 g", "12 ud" o un pack
+ * "3 x 200 ml" (devuelve el total: 0,6 L).
+ */
+export function extraerFormato(texto: string | null | undefined): {
+  format: string;
+  unitPriceUnit: "kg" | "L" | "ud" | null;
+  cantidad: number;
+} | null {
+  if (!texto) return null;
+
+  // Packs «4 x 125 Gr» / «2 x 1,5 L»: manda el total, no el tamaño unitario.
+  const mPack = texto.match(
+    /(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*(l|ml|kg|g|gr|ud|unidades?|u)\b/i,
+  );
+  if (mPack) {
+    const unidades = Number(mPack[1]);
+    const unitario = Number(mPack[2]!.replace(",", "."));
+    if (
+      Number.isFinite(unidades) &&
+      unidades > 0 &&
+      Number.isFinite(unitario) &&
+      unitario > 0
+    ) {
+      return aFormatoPar(unidades * unitario, mPack[3]!);
+    }
+  }
+
+  const m = texto.match(/(\d+(?:[.,]\d+)?)\s*(l|ml|kg|gr|g|ud|unidades?|u)\b/i);
+  if (!m) return null;
+  const cantidad = Number(m[1]!.replace(",", "."));
+  if (!Number.isFinite(cantidad) || cantidad <= 0) return null;
+  return aFormatoPar(cantidad, m[2]!);
 }

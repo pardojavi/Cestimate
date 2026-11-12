@@ -22,7 +22,8 @@ import { extraerFormato, normalizarUnidad } from "../src/adapters/types.js";
 
 /**
  * Tests de contrato por adaptador con respuestas grabadas (§2, §9).
- * Las fixtures son respuestas reales capturadas en vivo el 2026-11-11.
+ * Las fixtures son respuestas reales capturadas en vivo (2026-11-11 y
+ * 2026-11-12, ver «Precios reales»).
  */
 
 const FIXTURES = join(__dirname, "fixtures");
@@ -56,8 +57,42 @@ describe("Mercadona", () => {
     expect(sp!.url).toMatch(/^https:\/\/tienda\.mercadona\.es\/product\//);
     expect(sp!.name.length).toBeGreaterThan(0);
     expect(Number.isNaN(Date.parse(sp!.fetchedAt))).toBe(false);
-    // El precio viene del campo real `bulk_price`, nunca inventado.
+    // El precio total sale de `unit_price` (aquí 1 L, igual que bulk_price),
+    // nunca inventado.
     expect(sp!.price).toBeCloseTo(2.45, 2);
+    // Y el precio unitario es `bulk_price`: 2,45 €/L.
+    expect(sp!.unitPrice?.value).toBeCloseTo(2.45, 2);
+    expect(sp!.unitPrice?.unit).toBe("L");
+  });
+
+  it("cuenta el precio TOTAL de un pack (unit_price, no €/kg)", () => {
+    // Regresión del bug de precios: se usaba `bulk_price` (0,83 €/L) como
+    // total y un pack de 6 briks salía por 0,83 € en vez de 4,98 €.
+    const datos = leer<unknown>("mercadona-category.json");
+    const parseado = zMercadonaCategory.safeParse(datos);
+    if (!parseado.success) throw new Error("fixture inválido");
+
+    const crudos = (parseado.data.categories ?? []).flatMap(
+      (c) => (c as { products?: unknown[] }).products ?? [],
+    );
+    const convertir = (id: string) =>
+      crudos
+        .filter((p) => String((p as { id?: unknown }).id) === id)
+        .map((p) =>
+          mercadonaProducto(p as Parameters<typeof mercadonaProducto>[0]),
+        )[0];
+
+    const pack6 = convertir("10381"); // pack de 6 × 1 L
+    expect(pack6).not.toBeNull();
+    expect(pack6!.price).toBeCloseTo(4.98, 2); // total real
+    expect(pack6!.format).toBe("6 L");
+    expect(pack6!.unitPrice?.value).toBeCloseTo(0.83, 2); // €/L
+    expect(pack6!.unitPrice?.unit).toBe("L");
+
+    const brick = convertir("10382"); // 1 L suelto
+    expect(brick).not.toBeNull();
+    expect(brick!.price).toBeCloseTo(0.83, 2);
+    expect(brick!.unitPrice?.value).toBeCloseTo(0.83, 2);
   });
 
   it("convierte los productos de la categoría con precio", () => {
@@ -133,6 +168,46 @@ describe("Consum", () => {
     expect(sp!.imageUrl).toContain("_001.jpg");
     expect(sp!.imageUrl).toContain("cdn-consum.aktiosdigitalservices.com");
   });
+
+  it("respeta el precio TOTAL y el precio unitario de Consum", () => {
+    // Regresión: se dividía el total entre un tamaño mal leído y un tomate
+    // sin peso declarado acababa con «0,51 €/kg» en vez de 2,55 €/kg.
+    const datos = leer<unknown>("consum-precios.json");
+    const parseado = zConsumResponse.safeParse(datos);
+    if (!parseado.success) throw new Error("fixture inválido");
+
+    const convertir = (nombre: string) =>
+      parseado.data.products
+        .filter((p) => p.productData.name === nombre)
+        .map(consumProducto)
+        .filter((p): p is NonNullable<typeof p> => p !== null);
+
+    // Pack «3 x 200 ml»: total 1,45 € y 2,42 €/L (lo que reporta Consum).
+    const pack = convertir("Leche Semi sin Lactosa Minibrik Pack de 3")[0];
+    expect(pack).toBeDefined();
+    expect(pack!.price).toBeCloseTo(1.45, 2);
+    expect(pack!.format).toBe("0,6 L");
+    expect(pack!.unitPrice?.value).toBeCloseTo(2.42, 2);
+    expect(pack!.unitPrice?.unit).toBe("L");
+
+    // Peso variable (sin gramos en el nombre): formato nulo y €/kg real.
+    const tomate = convertir("Tomate Ensalada")[0];
+    expect(tomate).toBeDefined();
+    expect(tomate!.price).toBeCloseTo(0.51, 2);
+    expect(tomate!.format).toBeNull();
+    expect(tomate!.unitPrice?.value).toBeCloseTo(2.55, 2);
+    expect(tomate!.unitPrice?.unit).toBe("kg");
+
+    // Con tamaño declarado: 500 g → 0,5 kg y 4,40 €/kg.
+    const cherry = convertir("Tomate Cherry Cubeta")[0];
+    expect(cherry!.format).toBe("0,5 kg");
+    expect(cherry!.unitPrice?.value).toBeCloseTo(4.4, 2);
+
+    // Base «100 Gr»: 2,22 €/100 g → 22,20 €/kg.
+    const chicle = convertir("Chicle Fresa sin Azúcar Paquete 32 Unidades")[0];
+    expect(chicle!.unitPrice?.value).toBeCloseTo(22.2, 2);
+    expect(chicle!.unitPrice?.unit).toBe("kg");
+  });
 });
 
 describe("Aldi", () => {
@@ -160,8 +235,19 @@ describe("Aldi", () => {
       expect(p.storeId).toBe("aldi");
     }
     // El hit de leche del fixture: 1,03 €.
-    const leche = convertidos.find((p) => /leche/i.test(p.name));
-    expect(leche?.price).toBeCloseTo(1.03, 2);
+    const leche = convertidos.find((p) => /leche/i.test(p.name))!;
+    expect(leche.price).toBeCloseTo(1.03, 2);
+    // Sin basePrice se deduce del salesUnit «1 l unidad»: 1,03 €/L (nunca
+    // «€/ud», que es lo que devolvía normalizarUnidad("… unidad")).
+    expect(leche.unitPrice?.value).toBeCloseTo(1.03, 2);
+    expect(leche.unitPrice?.unit).toBe("L");
+
+    // Turrón 150 g: usa el basePrice oficial de Aldi (15,27 €/kg).
+    const turron = convertidos.find((p) => /turrón/i.test(p.name))!;
+    expect(turron.price).toBeCloseTo(2.29, 2);
+    expect(turron.format).toBe("0,15 kg");
+    expect(turron.unitPrice?.value).toBeCloseTo(15.27, 2);
+    expect(turron.unitPrice?.unit).toBe("kg");
   });
 
   it("descarta productos no disponibles", () => {
@@ -249,6 +335,19 @@ describe("Utilidades de formato", () => {
     expect(extraerFormato("500 g")?.cantidad).toBeCloseTo(0.5);
     expect(extraerFormato("12 ud")?.unitPriceUnit).toBe("ud");
     expect(extraerFormato("sin cantidad")).toBeNull();
+  });
+
+  it("en un pack manda el total («3 x 200 ml» → 0,6 L)", () => {
+    expect(extraerFormato("Leche Mini Pack de 3 3 x 200 ml")).toEqual({
+      format: "0,6 L",
+      unitPriceUnit: "L",
+      cantidad: 0.6,
+    });
+    expect(extraerFormato("Yogur Griego 4 x 125 Gr")?.cantidad).toBeCloseTo(
+      0.5,
+    );
+    // Sin notación de pack sigue leyendo el tamaño unitario.
+    expect(extraerFormato("Yogur Griego Natural 1 Kg")?.cantidad).toBe(1);
   });
 
   it("normaliza unidades", () => {

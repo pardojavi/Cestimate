@@ -48,6 +48,8 @@ interface ProductoMercadona {
     unit_price?: string | null;
     size_format?: string | null;
     unit_size?: number | null;
+    /** Peso variable: el total es una estimación sobre el peso aproximado. */
+    approx_size?: boolean | null;
   };
 }
 
@@ -75,29 +77,48 @@ function extraerProductos(
 }
 
 export function aStoreProduct(p: ProductoMercadona): StoreProduct | null {
-  const precio = aNumero(p.price_instructions?.bulk_price);
-  if (precio === null || precio <= 0) return null;
+  // Semántica de price_instructions verificada en vivo (2026-11-12), tanto
+  // contra su API como contra webs de precios externas:
+  //   • `unit_price`  → precio TOTAL que se paga (0,50 € la barra de pan,
+  //                     4,98 € el pack de 6 briks de leche).
+  //   • `bulk_price`  → precio por kg/L (2,00 €/kg), idéntico salvo
+  //                     redondeo a `reference_price`.
+  // Siempre se cumple `unit_price / unit_size = bulk_price`, de modo que usar
+  // bulk_price como total inflaba el precio de todo lo que no pesa 1 kg/L
+  // («Barra de pan» a 2,00 € en vez de 0,50 €).
+  const pi = p.price_instructions;
+  let total = aNumero(pi?.unit_price);
+  if (total === null || total <= 0) total = aNumero(pi?.bulk_price);
+  if (total === null || total <= 0) return null;
   const nombre = p.display_name?.trim();
   if (!nombre) return null;
 
-  const sizeFormat = p.price_instructions?.size_format ?? null;
-  const unitSize = p.price_instructions?.unit_size ?? null;
-  const unitPrice = aNumero(p.price_instructions?.unit_price);
+  const sizeFormat = pi?.size_format ?? null;
+  const unitSize = pi?.unit_size ?? null;
   const unidad = normalizarUnidad(sizeFormat);
-  const formato =
+  // €/kg o €/L: lo da `bulk_price`; si faltara, se deduce del total.
+  let porUnidad = aNumero(pi?.bulk_price);
+  if ((porUnidad === null || porUnidad <= 0) && unitSize && unitSize > 0) {
+    porUnidad = total / unitSize;
+  }
+
+  const base =
     unitSize && unitSize > 0 && sizeFormat
       ? `${unitSize} ${sizeFormat === "l" ? "L" : sizeFormat}`.replace(".", ",")
       : null;
+  // Peso variable (fruta y verdura): Mercadona cotiza €/kg y el total es una
+  // estimación sobre el peso aproximado, así lo marcamos.
+  const formato = base && pi?.approx_size ? `${base} aprox.` : base;
 
   return {
     storeId: "mercadona",
     externalId: String(p.id),
     name: nombre,
     format: formato,
-    price: precio,
+    price: total,
     unitPrice:
-      unitPrice && unidad && unitPrice > 0
-        ? { value: unitPrice, unit: unidad }
+      porUnidad && unidad && porUnidad > 0
+        ? { value: porUnidad, unit: unidad }
         : null,
     imageUrl: p.thumbnail ?? null,
     url: `https://tienda.mercadona.es/product/${p.id}/${p.slug ?? ""}`.replace(

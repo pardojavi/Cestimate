@@ -163,6 +163,8 @@ export const zMercadonaPriceInstructions = z.object({
   unit_size: z.number().nullable().optional(),
   reference_price: z.string().nullable().optional(),
   previous_unit_price: z.string().nullable().optional(),
+  // Peso variable (fruta/verdura): el total es estimado por Mercadona.
+  approx_size: z.boolean().nullable().optional(),
 });
 
 export const zMercadonaProduct = z.object({
@@ -204,6 +206,8 @@ export const zConsumResponse = z.object({
           z.object({
             value: z.object({
               centAmount: z.number(),
+              // Precio por la base de `unitPriceUnitType` («1 Kg», «100 ml»…).
+              centUnitAmount: z.number().nullable().optional(),
             }),
           }),
         ),
@@ -229,6 +233,16 @@ export const zAldiResponse = z.object({
       currentPrice: z
         .object({
           priceValue: z.number(),
+          // Precio por la unidad de venta (p. ej. 15,27 €/kg del turrón).
+          basePrice: z
+            .array(
+              z.object({
+                basePriceValue: z.number().optional(),
+                basePriceScale: z.string().optional(),
+              }),
+            )
+            .nullable()
+            .optional(),
         })
         .nullable()
         .optional(),

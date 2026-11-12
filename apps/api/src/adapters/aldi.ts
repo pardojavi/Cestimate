@@ -39,8 +39,20 @@ export function aStoreProduct(h: AldiHit): StoreProduct | null {
   if (h.isComingSoon || h.isRecall) return null;
 
   const extraido = extraerFormato(h.salesUnit ?? "") ?? extraerFormato(h.name);
-  const unidad =
-    normalizarUnidad(h.salesUnit ?? "") ?? extraido?.unitPriceUnit ?? null;
+  // Precio unitario: manda el oficial de Aldi (`basePrice`, p. ej. 15,27 €/kg
+  // del turrón). Ojo con normalizarUnidad(salesUnit): «150 g unidad»
+  // contendría «unidad» y devolvería «ud» (bug: 15,27 €/ud en vez de €/kg).
+  const base = h.currentPrice?.basePrice?.[0] ?? null;
+  const escala = normalizarUnidad(base?.basePriceScale ?? null);
+  const unitPrice =
+    base &&
+    typeof base.basePriceValue === "number" &&
+    base.basePriceValue > 0 &&
+    escala
+      ? { value: base.basePriceValue, unit: escala }
+      : extraido && extraido.cantidad > 0 && extraido.unitPriceUnit
+        ? { value: precio / extraido.cantidad, unit: extraido.unitPriceUnit }
+        : null;
 
   const imagen = h.assets?.find((a) => a.type === "primary")?.url ?? null;
 
@@ -50,10 +62,7 @@ export function aStoreProduct(h: AldiHit): StoreProduct | null {
     name: h.name,
     format: extraido?.format ?? h.salesUnit ?? null,
     price: precio,
-    unitPrice:
-      extraido && extraido.cantidad > 0 && unidad
-        ? { value: precio / extraido.cantidad, unit: unidad }
-        : null,
+    unitPrice,
     // scene7 sirve la imagen sin extensión; pedimos un tamaño razonable.
     imageUrl: imagen ? `${imagen}?wid=300` : null,
     url: h.productSlug

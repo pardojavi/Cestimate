@@ -1,0 +1,706 @@
+{
+  "totalCount": 6,
+  "products": [
+    {
+      "id": 5931,
+      "productType": 1,
+      "code": "7080596",
+      "ean": "8414807514202",
+      "type": "product",
+      "productData": {
+        "name": "Leche Entera Brik",
+        "brand": {
+          "id": "CONSUM",
+          "name": "CONSUM",
+          "url": "consum",
+          "landing": false
+        },
+        "url": "https://tienda.consum.es/es/p/leche-entera-brik/7080596",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080596.jpg?t=20260812080202",
+        "description": "Leche Entera Brik 1 L",
+        "seo": "leche-entera-brik",
+        "seoTitle": "",
+        "seoDescription": "leche-entera-brik",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "hidden.midiadia",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              },
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "hidden.midiadia",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          },
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080596_001.jpg?t=20250522091502",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080596_002.jpg?t=20250522091502",
+          "order": 2,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7080596_003.jpg?t=20250522091502",
+          "order": 3,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 0.96,
+              "centUnitAmount": 0.96
+            }
+          }
+        ],
+        "taxPercentage": 4,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 L",
+        "minimumUnit": 1,
+        "maximumUnit": 90,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 2076,
+          "name": "Entera",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    },
+    {
+      "id": 30052,
+      "productType": 1,
+      "code": "7405103",
+      "ean": "8410297115905",
+      "type": "product",
+      "productData": {
+        "name": "Leche Semi sin Lactosa Minibrik Pack de 3",
+        "brand": {
+          "id": "ASTURIANA",
+          "name": "ASTURIANA",
+          "url": "asturiana",
+          "landing": false
+        },
+        "url": "https://tienda.consum.es/es/p/leche-semi-sin-lactosa-minibrik-pack-de-3/7405103",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7405103.jpg?t=20260812080405",
+        "description": "Leche Semi sin Lactosa Minibrik Pack de 3 3 x 200 ml",
+        "seo": "leche-semi-sin-lactosa-minibrik-pack-de-3",
+        "seoTitle": "",
+        "seoDescription": "leche-semi-sin-lactosa-minibrik-pack-de-3",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["0"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["0"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7405103_001.jpg?t=20220817040001",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7405103_002.jpg?t=20240831091501",
+          "order": 2,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7405103_003.jpg?t=20240831091501",
+          "order": 3,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7405103_004.jpg?t=20240831091501",
+          "order": 4,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 1.45,
+              "centUnitAmount": 2.42
+            }
+          }
+        ],
+        "taxPercentage": 4,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 L",
+        "minimumUnit": 1,
+        "maximumUnit": 49,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 2090,
+          "name": "Leches especiales",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    },
+    {
+      "id": 4703,
+      "productType": 3,
+      "code": "60012",
+      "ean": "8412276239640",
+      "type": "product",
+      "productData": {
+        "name": "Tomate Ensalada",
+        "brand": {
+          "id": "",
+          "name": ""
+        },
+        "url": "https://tienda.consum.es/es/p/tomate-ensalada/60012",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/60012.jpg?t=20260814075601",
+        "description": "Tomate Ensalada",
+        "seo": "tomate-ensalada",
+        "seoTitle": "",
+        "seoDescription": "tomate-ensalada",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "hidden.midiadia",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              },
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["0"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "hidden.midiadia",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          },
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["0"]
+              }
+            ]
+          }
+        ],
+        "format": "Pieza precio aprox.",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/60012_001.jpg?t=20220607040002",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/60012_002.jpg?t=20260623130002",
+          "order": 2,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 0.51,
+              "centUnitAmount": 2.55
+            }
+          }
+        ],
+        "taxPercentage": 4,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 Kg",
+        "minimumUnit": 1,
+        "maximumUnit": 49,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 5228,
+          "name": "Tomates",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    },
+    {
+      "id": 9367,
+      "productType": 1,
+      "code": "7218167",
+      "ean": "8412276548971",
+      "type": "product",
+      "productData": {
+        "name": "Tomate Cherry Cubeta",
+        "brand": {
+          "id": "",
+          "name": ""
+        },
+        "url": "https://tienda.consum.es/es/p/tomate-cherry-cubeta/7218167",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7218167.jpg?t=20260812080234",
+        "description": "Tomate Cherry Cubeta 500 Gr",
+        "seo": "tomate-cherry-cubeta",
+        "seoTitle": "",
+        "seoDescription": "tomate-cherry-cubeta",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "hidden.midiadia",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              },
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["0"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "hidden.midiadia",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          },
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["0"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7218167_001.jpg?t=20250701091502",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7218167_002.jpg?t=20250701091502",
+          "order": 2,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 2.2,
+              "centUnitAmount": 4.4
+            }
+          }
+        ],
+        "taxPercentage": 4,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 Kg",
+        "minimumUnit": 1,
+        "maximumUnit": 49,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 5228,
+          "name": "Tomates",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    },
+    {
+      "id": 44091,
+      "productType": 1,
+      "code": "7463214",
+      "ean": "8435434367269",
+      "type": "product",
+      "productData": {
+        "name": "Fresa Entera",
+        "brand": {
+          "id": "C.NAVARRA",
+          "name": "C.NAVARRA",
+          "url": "c-navarra",
+          "landing": false
+        },
+        "url": "https://tienda.consum.es/es/p/fresa-entera/7463214",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7463214.jpg?t=20260812080506",
+        "description": "Fresa Entera 300 Gr",
+        "seo": "fresa-entera",
+        "seoTitle": "",
+        "seoDescription": "fresa-entera",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["0"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["0"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7463214_001.jpg?t=20260129170001",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7463214_002.jpg?t=20260129170001",
+          "order": 2,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 1.9,
+              "centUnitAmount": 6.33
+            }
+          }
+        ],
+        "taxPercentage": 4,
+        "priceUnitType": "",
+        "unitPriceUnitType": "1 Kg",
+        "minimumUnit": 1,
+        "maximumUnit": 49,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 5091,
+          "name": "Fruta congelada",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    },
+    {
+      "id": 14739,
+      "productType": 1,
+      "code": "7274863",
+      "ean": "8414807540249",
+      "type": "product",
+      "productData": {
+        "name": "Chicle Fresa sin Azúcar Paquete 32 Unidades",
+        "brand": {
+          "id": "CONSUM",
+          "name": "CONSUM",
+          "url": "consum",
+          "landing": false
+        },
+        "url": "https://tienda.consum.es/es/p/chicle-fresa-sin-azucar-paquete-32-unidades/7274863",
+        "imageURL": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7274863.jpg?t=20260813075955",
+        "description": "Chicle Fresa sin Azúcar Paquete 32 Unidades 45 Gr",
+        "seo": "chicle-fresa-sin-azucar-paquete-32-unidades",
+        "seoTitle": "",
+        "seoDescription": "chicle-fresa-sin-azucar-paquete-32-unidades",
+        "attributeGroups": [
+          {
+            "code": "group.attribute.default",
+            "name": "Información del producto",
+            "tooltip": "",
+            "visibility": true,
+            "infoProduct": true,
+            "attributes": [
+              {
+                "code": "hidden.midiadia",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              },
+              {
+                "code": "filter.id.brand.distributor",
+                "languages": [
+                  {
+                    "lang": "00",
+                    "values": ["1"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "code": "hidden.midiadia",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          },
+          {
+            "code": "filter.id.brand.distributor",
+            "languages": [
+              {
+                "lang": "00",
+                "values": ["1"]
+              }
+            ]
+          }
+        ],
+        "format": "",
+        "novelty": false,
+        "featured": false,
+        "sponsored": false,
+        "actions": [],
+        "containAllergensIntolernacies": false,
+        "availability": "1",
+        "temporaryOutOfStock": false
+      },
+      "media": [
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7274863_001.jpg?t=20220723040003",
+          "order": 1,
+          "type": "P"
+        },
+        {
+          "url": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7274863_002.jpg?t=20220723040003",
+          "order": 2,
+          "type": "P"
+        }
+      ],
+      "priceData": {
+        "prices": [
+          {
+            "id": "PRICE",
+            "toDate": "2099-12-31T22:59:59Z",
+            "value": {
+              "centAmount": 1,
+              "centUnitAmount": 2.22
+            }
+          }
+        ],
+        "taxPercentage": 10,
+        "priceUnitType": "",
+        "unitPriceUnitType": "100 Gr",
+        "minimumUnit": 1,
+        "maximumUnit": 49,
+        "intervalUnit": 1
+      },
+      "purchaseData": {
+        "allowComments": false
+      },
+      "categories": [
+        {
+          "id": 5037,
+          "name": "Chicles",
+          "type": 0
+        }
+      ],
+      "offers": [],
+      "coupons": []
+    }
+  ]
+}

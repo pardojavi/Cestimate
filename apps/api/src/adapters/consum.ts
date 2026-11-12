@@ -26,26 +26,57 @@ const BASE = "https://tienda.consum.es/api/rest/V1.0/catalog/product";
 const POR_PAGINA = 20;
 const MAX_PAGINAS = 3; // hasta 60 candidatos, se filtran en local
 
+/**
+ * Precio unitario que reporta Consum: `centUnitAmount` está cotizado sobre la
+ * base de `unitPriceUnitType` («1 Kg», «1 L», «1 U», «100 ml», «100 Gr»…),
+ * p. ej. tomate 0,51 € la pieza → 2,55 €/kg. Se normaliza a nuestras unidades.
+ * Verificado en vivo (2026-11-12): el cálculo total/cantidad se equivocaba en
+ * productos sin peso declarado y en packs.
+ */
+function precioUnitarioConsum(
+  centUnitAmount: number | null | undefined,
+  uType: string | null | undefined,
+): { value: number; unit: "kg" | "L" | "ud" } | null {
+  if (
+    typeof centUnitAmount !== "number" ||
+    !Number.isFinite(centUnitAmount) ||
+    centUnitAmount <= 0 ||
+    !uType
+  ) {
+    return null;
+  }
+  const m = uType
+    .trim()
+    .match(/^(\d+(?:[.,]\d+)?)\s*(kgs?|g|grs?|l|lts?|ml|uds?|unidades?|u)\b/i);
+  if (!m) return null;
+  const base = Number(m[1]!.replace(",", "."));
+  if (!Number.isFinite(base) || base <= 0) return null;
+  const u = m[2]!.toLowerCase();
+  if (u.startsWith("k")) return { value: centUnitAmount / base, unit: "kg" };
+  if (u === "g" || u.startsWith("gr"))
+    return { value: centUnitAmount / (base / 1000), unit: "kg" };
+  if (u === "ml") return { value: centUnitAmount / (base / 1000), unit: "L" };
+  if (u.startsWith("l")) return { value: centUnitAmount / base, unit: "L" };
+  return { value: centUnitAmount / base, unit: "ud" };
+}
+
 export function aStoreProduct(p: ConsumProduct): StoreProduct | null {
+  // `centAmount` es el precio TOTAL en euros (pese al nombre del campo): el
+  // pack de 3 minibriks cuesta 1,45 €, no 2,42 (que es el €/L).
   const euros = p.priceData?.prices?.[0]?.value?.centAmount;
   if (typeof euros !== "number" || euros <= 0) return null;
   const nombre = p.productData?.name?.trim();
   if (!nombre) return null;
 
-  // Tamaño en la descripción ("Leche Entera Brik 1 L") o en unitPriceUnitType.
-  const descripcion = p.productData.description ?? "";
-  const extraido =
-    extraerFormato(descripcion) ??
-    extraerFormato(p.priceData.unitPriceUnitType ?? "") ??
-    extraerFormato(nombre);
+  const valor = p.priceData?.prices?.[0]?.value;
+  const uType = p.priceData?.unitPriceUnitType ?? null;
 
-  const unit =
-    p.priceData.unitPriceUnitType && /kg/i.test(p.priceData.unitPriceUnitType)
-      ? "kg"
-      : p.priceData.unitPriceUnitType &&
-          /l\b/i.test(p.priceData.unitPriceUnitType)
-        ? "L"
-        : (extraido?.unitPriceUnit ?? null);
+  // Tamaño en la descripción ("Leche Entera Brik 1 L", pack «3 x 200 ml»).
+  // Ojo: no usamos unitPriceUnitType como formato: es la BASE del precio
+  // unitario («1 Kg») y un tomate sin peso acabaría con «1 kg» de formato.
+  const descripcion = p.productData.description ?? "";
+  const extraido = extraerFormato(descripcion) ?? extraerFormato(nombre);
+  const unitarioApi = precioUnitarioConsum(valor?.centUnitAmount, uType);
 
   // Imagen: `productData.imageURL` está caducada (404); la válida es la
   // primera de `media` (tipo «P» = producto). Fallback por si lo cambian.
@@ -59,12 +90,14 @@ export function aStoreProduct(p: ConsumProduct): StoreProduct | null {
     storeId: "consum",
     externalId: String(p.code ?? p.id),
     name: nombre,
-    format: extraido?.format ?? p.priceData.unitPriceUnitType ?? null,
+    format: extraido?.format ?? null,
     price: euros,
+    // Si Consum da su precio unitario, manda; si no, se deduce del tamaño.
     unitPrice:
-      extraido && extraido.cantidad > 0 && unit
-        ? { value: euros / extraido.cantidad, unit }
-        : null,
+      unitarioApi ??
+      (extraido && extraido.cantidad > 0 && extraido.unitPriceUnit
+        ? { value: euros / extraido.cantidad, unit: extraido.unitPriceUnit }
+        : null),
     imageUrl: imagen,
     url: p.productData.url,
     fetchedAt: new Date().toISOString(),
