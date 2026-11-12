@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { abrirDB, guardarProducto } from "../src/lib/db.js";
-import { calcularResumen } from "../src/routes/basket.js";
+import { calcularResumen, crearArticulo } from "../src/routes/basket.js";
 
 /**
  * Tests del resumen de la cesta (§3.3, §9): totales, mínimo por fila,
@@ -133,5 +133,72 @@ describe("calcularResumen", () => {
     expect(consum.total).toBeCloseTo(0.83, 2);
     expect(resumen.cheapest).toBe("consum");
     expect(resumen.saving).toBeCloseTo(0.13, 2);
+  });
+});
+
+describe("crearArticulo", () => {
+  it("crea el artículo con sus emparejamientos en una transacción", () => {
+    db.exec("DELETE FROM basket_item_match; DELETE FROM basket_item;");
+
+    const idLecheM = anadirProducto("mercadona", "Leche entera", 0.96);
+    const idLecheC = anadirProducto("consum", "Leche Entera Brik", 0.83);
+
+    const id = crearArticulo(db, {
+      genericName: "Leche entera 1 L",
+      qty: 2,
+      matches: [
+        { storeId: "mercadona", productId: idLecheM },
+        { storeId: "consum", productId: idLecheC },
+      ],
+    });
+
+    const item = db
+      .prepare("SELECT generic_name, qty FROM basket_item WHERE id = ?")
+      .get(id) as { generic_name: string; qty: number };
+    expect(item.generic_name).toBe("Leche entera 1 L");
+    expect(item.qty).toBe(2);
+
+    const matches = db
+      .prepare(
+        "SELECT store_id, product_id FROM basket_item_match WHERE basket_item_id = ?",
+      )
+      .all(id) as { store_id: string; product_id: number }[];
+    expect(matches).toHaveLength(2);
+    expect(matches.find((m) => m.store_id === "mercadona")!.product_id).toBe(
+      idLecheM,
+    );
+    expect(matches.find((m) => m.store_id === "consum")!.product_id).toBe(
+      idLecheC,
+    );
+  });
+
+  it("no escribe nada si un emparejamiento no es válido", () => {
+    db.exec("DELETE FROM basket_item_match; DELETE FROM basket_item;");
+
+    const idLecheM = anadirProducto("mercadona", "Leche entera", 0.96);
+    const antes = db.prepare("SELECT COUNT(*) n FROM basket_item").get() as {
+      n: number;
+    };
+
+    // Producto de otra tienda: debe fallar sin dejar el artículo a medias.
+    expect(() =>
+      crearArticulo(db, {
+        genericName: "No debe quedar",
+        qty: 1,
+        matches: [
+          { storeId: "mercadona", productId: idLecheM },
+          { storeId: "consum", productId: idLecheM }, // no es de Consum
+        ],
+      }),
+    ).toThrow();
+
+    const despues = db.prepare("SELECT COUNT(*) n FROM basket_item").get() as {
+      n: number;
+    };
+    expect(despues.n).toBe(antes.n);
+    const huerfanos = db
+      .prepare("SELECT COUNT(*) n FROM basket_item_match")
+      .get() as { n: number };
+    expect(huerfanos.n).toBe(0);
   });
 });

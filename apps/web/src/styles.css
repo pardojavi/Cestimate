@@ -1152,6 +1152,137 @@ details.detalle-caja > summary {
   flex-wrap: wrap;
 }
 
+/* ------------- Selección para comparar (pestaña Buscar) ----------- */
+
+/* Casilla «marcar para comparar»: área táctil de 44 px (ESTILOS.md §4) */
+.casilla-marcar {
+  min-width: 44px;
+  min-height: 44px;
+  margin: -8px 0; /* evita inflar la fila */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.casilla-marcar input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--best);
+  cursor: pointer;
+}
+
+.casilla-marcar input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Barra fija sobre la barra de pestañas con la selección actual */
+.barra-comparacion {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 57px);
+  z-index: 45;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.barra-comparacion__datos {
+  flex: 1;
+  min-width: 0;
+}
+
+.barra-comparacion__datos strong {
+  display: block;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.barra-comparacion__error {
+  color: var(--stamp-ink);
+}
+
+.barra-comparacion__chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.barra-comparacion .btn {
+  flex-shrink: 0;
+}
+
+/* Chip de tienda en la barra: punto de color + nombre */
+.chip-tienda {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  color: var(--ink-soft);
+}
+
+/* Hueco para que la barra no tape el último resultado */
+.relleno-barra {
+  height: 96px;
+}
+
+/* -------- Buscador dentro del selector de producto (Cesta) -------- */
+
+.campo-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 6px 0 10px;
+  min-height: 44px;
+  margin-bottom: 8px;
+}
+
+.campo-selector svg {
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+.campo-selector input {
+  flex: 1;
+  min-width: 0;
+  min-height: 42px;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-family: var(--fuente-texto);
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.campo-selector input:focus {
+  outline: none;
+}
+
+.campo-selector:focus-within {
+  border-color: var(--info);
+  outline: 2px solid var(--info);
+  outline-offset: 1px;
+}
+
+.campo-selector .btn {
+  min-height: 36px;
+  padding: 4px 8px;
+}
+
 @media (min-width: 720px) {
   .contenido {
     padding: 20px 16px;

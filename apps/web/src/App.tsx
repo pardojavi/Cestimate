@@ -89,7 +89,7 @@ export default function App() {
       </header>
 
       <main className="contenido">
-        {vista === "buscar" && <Buscador />}
+        {vista === "buscar" && <Buscador irA={setVista} />}
         {vista === "cesta" && <Cesta irA={setVista} />}
         {vista === "graficas" && <Graficas />}
         {vista === "historial" && <Historial />}

@@ -13,7 +13,59 @@ const adaptadores = registrarAdaptadores(abrirDB());
 const zItem = z.object({
   genericName: z.string().min(1).max(200),
   qty: z.number().positive().max(999).default(1),
+  // Emparejamientos iniciales: permite crear un artículo ya comparado
+  // desde la pestaña Buscar (un producto por tienda).
+  matches: z
+    .array(
+      z.object({
+        storeId: z.string().min(1).max(64),
+        productId: z.number().int().positive(),
+      }),
+    )
+    .max(30)
+    .optional(),
 });
+
+/**
+ * Crea un artículo con sus emparejamientos en una sola transacción.
+ * Si algún emparejamiento no es válido (producto inexistente o de otra
+ * tienda), no se escribe nada y se lanza un Error con statusCode 400.
+ */
+export function crearArticulo(
+  base: DB,
+  datos: {
+    genericName: string;
+    qty: number;
+    matches?: { storeId: string; productId: number }[];
+  },
+): number {
+  const matches = datos.matches ?? [];
+  for (const m of matches) {
+    const producto = base
+      .prepare("SELECT id, store_id FROM product WHERE id = ?")
+      .get(m.productId) as { id: number; store_id: string } | undefined;
+    if (!producto)
+      throw Object.assign(new Error("Producto no encontrado."), {
+        statusCode: 400,
+      });
+    if (producto.store_id !== m.storeId)
+      throw Object.assign(new Error("El producto no pertenece a esa tienda."), {
+        statusCode: 400,
+      });
+  }
+  return base.transaction(() => {
+    const resultado = base
+      .prepare("INSERT INTO basket_item (generic_name, qty) VALUES (?, ?)")
+      .run(datos.genericName, datos.qty);
+    const itemId = Number(resultado.lastInsertRowid);
+    const emparejar = base.prepare(
+      `INSERT INTO basket_item_match (basket_item_id, store_id, product_id) VALUES (?, ?, ?)
+       ON CONFLICT (basket_item_id, store_id) DO UPDATE SET product_id = excluded.product_id`,
+    );
+    for (const m of matches) emparejar.run(itemId, m.storeId, m.productId);
+    return itemId;
+  })();
+}
 
 const zEdicionItem = z.object({
   genericName: z.string().min(1).max(200).optional(),
@@ -218,11 +270,10 @@ export function registrarCesta(app: FastifyInstance): void {
     if (!parseado.success) {
       return reply.code(400).send({ error: "Datos del artículo no válidos." });
     }
-    const base = abrirDB();
-    const resultado = base
-      .prepare("INSERT INTO basket_item (generic_name, qty) VALUES (?, ?)")
-      .run(parseado.data.genericName, parseado.data.qty);
-    return reply.code(201).send({ id: Number(resultado.lastInsertRowid) });
+    // Si un emparejamiento no es válido, crearArticulo lanza un Error con
+    // statusCode 400 y no se escribe nada; setErrorHandler lo devuelve tal cual.
+    const id = crearArticulo(abrirDB(), parseado.data);
+    return reply.code(201).send({ id });
   });
 
   app.patch<{ Params: { id: string } }>(

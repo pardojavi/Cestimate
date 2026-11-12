@@ -8,15 +8,21 @@ import Producto from "../componentes/Producto";
  * Buscar (ESTILOS.md §8): campo + botón, nota breve, una tarjeta de
  * tienda por tienda activa. Cada tienda informa de su estado de forma
  * independiente: con resultados, «sin resultados» o «error» + Reintentar.
+ *
+ * Además permite marcar productos de distintas tiendas (aunque tengan
+ * nombres diferentes) y añadirlos a la cesta de una vez, ya emparejados
+ * para comparar (§3.2).
  */
-export default function Buscador() {
+export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
   const [texto, setTexto] = useState("");
   const [consulta, setConsulta] = useState("");
+  const [marcados, setMarcados] = useState<Record<string, StoreProduct>>({});
   const { data: tiendas } = useTiendas();
   const { data, isFetching, isError, error, refetch } = useBusqueda(consulta);
   const anadir = useAnadirArticulo();
 
   const activas = tiendas?.filter((t) => t.active) ?? [];
+  const listaMarcados = Object.values(marcados);
 
   // Precio más bajo de toda la respuesta (para la insignia).
   const masBarato = data?.results
@@ -29,6 +35,35 @@ export default function Buscador() {
   function buscar(e: React.FormEvent) {
     e.preventDefault();
     setConsulta(texto.trim());
+  }
+
+  /** Marca/desmarca un producto; por tienda solo vale uno (gana el último). */
+  function alternar(p: StoreProduct) {
+    setMarcados((prev) => {
+      const clave = `${p.storeId}:${p.externalId}`;
+      const nuevo = { ...prev };
+      if (nuevo[clave]) {
+        delete nuevo[clave];
+      } else {
+        for (const k of Object.keys(nuevo)) {
+          if (nuevo[k]!.storeId === p.storeId) delete nuevo[k];
+        }
+        nuevo[clave] = p;
+      }
+      return nuevo;
+    });
+  }
+
+  function anadirComparacion() {
+    anadir.mutate(
+      { productos: listaMarcados },
+      {
+        onSuccess: () => {
+          setMarcados({});
+          irA?.("cesta");
+        },
+      },
+    );
   }
 
   return (
@@ -91,8 +126,10 @@ export default function Buscador() {
               resultado={r}
               destacadoId={masBarato?.externalId}
               destacadoStore={masBarato?.storeId}
-              onAnadir={(p) => anadir.mutate({ producto: p })}
+              onAnadir={(p) => anadir.mutate({ productos: [p] })}
               anadiendo={anadir.isPending}
+              marcados={marcados}
+              onToggle={alternar}
             />
           ))}
         </>
@@ -104,6 +141,52 @@ export default function Buscador() {
           precios entre tiendas.
         </div>
       )}
+
+      {listaMarcados.length > 0 && (
+        <>
+          <div className="barra-comparacion" role="status">
+            <div className="barra-comparacion__datos">
+              {anadir.isError ? (
+                <strong className="barra-comparacion__error">
+                  {anadir.error instanceof Error
+                    ? anadir.error.message
+                    : "No se pudo añadir a la cesta."}
+                </strong>
+              ) : (
+                <strong>
+                  {listaMarcados.length} producto
+                  {listaMarcados.length === 1 ? "" : "s"} marcado
+                  {listaMarcados.length === 1 ? "" : "s"}
+                </strong>
+              )}
+              <div className="barra-comparacion__chips">
+                {listaMarcados.map((p) => (
+                  <span
+                    key={`${p.storeId}:${p.externalId}`}
+                    className="chip-tienda"
+                  >
+                    <span
+                      className="punto-color"
+                      style={{ background: colorDeTienda(p.storeId) }}
+                      aria-hidden
+                    />
+                    {tiendas?.find((t) => t.id === p.storeId)?.name ??
+                      p.storeId}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <button
+              className="btn primario"
+              onClick={anadirComparacion}
+              disabled={anadir.isPending}
+            >
+              {anadir.isPending ? "Añadiendo…" : "Comparar en la cesta"}
+            </button>
+          </div>
+          <div className="relleno-barra" aria-hidden />
+        </>
+      )}
     </section>
   );
 }
@@ -114,12 +197,16 @@ function GrupoTienda({
   destacadoStore,
   onAnadir,
   anadiendo,
+  marcados,
+  onToggle,
 }: {
   resultado: StoreSearchResult;
   destacadoId?: string;
   destacadoStore?: string;
   onAnadir: (p: StoreProduct) => void;
   anadiendo: boolean;
+  marcados: Record<string, StoreProduct>;
+  onToggle: (p: StoreProduct) => void;
 }) {
   const color = colorDeTienda(resultado.storeId);
 
@@ -166,6 +253,8 @@ function GrupoTienda({
             }
             onAnadir={onAnadir}
             anadiendo={anadiendo}
+            seleccionado={!!marcados[`${p.storeId}:${p.externalId}`]}
+            onToggle={onToggle}
           />
         ))}
 

@@ -14,11 +14,17 @@ export default function Producto({
   destacado,
   onAnadir,
   anadiendo,
+  seleccionado,
+  onToggle,
 }: {
   producto: StoreProduct;
   destacado?: boolean;
   onAnadir?: (p: StoreProduct) => void;
   anadiendo?: boolean;
+  /** Casilla «marcar para comparar» (pestaña Buscar). */
+  seleccionado?: boolean;
+  /** Si no se pasa, no se muestra la casilla. */
+  onToggle?: (p: StoreProduct) => void;
 }) {
   const datos = [
     producto.format,
@@ -69,6 +75,24 @@ export default function Producto({
       </div>
 
       <div className="producto__acciones">
+        {onToggle && (
+          <label
+            className="casilla-marcar"
+            title={
+              producto.localId
+                ? "Marcar para comparar en la cesta"
+                : "Producto no localizable en la base de datos"
+            }
+          >
+            <input
+              type="checkbox"
+              checked={!!seleccionado}
+              onChange={() => onToggle(producto)}
+              disabled={!producto.localId}
+              aria-label={`Marcar ${producto.name} para comparar`}
+            />
+          </label>
+        )}
         <span className="precio">{formatoEUR(producto.price)}</span>
         {onAnadir && (
           <button

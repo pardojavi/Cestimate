@@ -153,15 +153,20 @@ export function useTiendas() {
 
 export function useBusqueda(
   q: string,
-  opciones: Partial<UseQueryOptions<SearchResponse>> = {},
+  opciones: Partial<UseQueryOptions<SearchResponse>> & {
+    /** Restringe la búsqueda a una tienda (p. ej. el selector de la Cesta). */
+    stores?: string;
+  } = {},
 ) {
+  const { stores, ...resto } = opciones;
+  const params = new URLSearchParams({ q });
+  if (stores) params.set("stores", stores);
   return useQuery({
-    queryKey: ["search", q],
-    queryFn: () =>
-      pedir<SearchResponse>(`/api/search?q=${encodeURIComponent(q)}`),
-    enabled: q.trim().length >= 2 && (opciones.enabled ?? true),
+    queryKey: ["search", q, stores ?? ""],
+    queryFn: () => pedir<SearchResponse>(`/api/search?${params.toString()}`),
+    enabled: q.trim().length >= 2 && (resto.enabled ?? true),
     staleTime: 60_000,
-    ...opciones,
+    ...resto,
   });
 }
 
@@ -232,21 +237,29 @@ function invalidar(
 export function useAnadirArticulo() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (datos: { producto: StoreProduct }) => {
-      const { producto } = datos;
+    /**
+     * Añade un artículo a la cesta. `productos` puede llevar varios (uno
+     * por tienda): todos se emparejan de golpe y el artículo queda listo
+     * para comparar. Si un producto no tiene `localId` se crea el artículo
+     * sin ese emparejamiento (se podrá elegir luego desde la Cesta).
+     */
+    mutationFn: async ({ productos }: { productos: StoreProduct[] }) => {
+      if (productos.length === 0)
+        throw new ErrorApi("No has seleccionado ningún producto.");
+      // Un solo producto por tienda: si se repite, gana el último.
+      const porTienda = new Map<string, StoreProduct>();
+      for (const p of productos) if (p.localId) porTienda.set(p.storeId, p);
       const creado = await pedir<{ id: number }>("/api/basket/items", {
         method: "POST",
-        body: JSON.stringify({ genericName: producto.name, qty: 1 }),
+        body: JSON.stringify({
+          genericName: productos[0]!.name,
+          qty: 1,
+          matches: [...porTienda.values()].map((p) => ({
+            storeId: p.storeId,
+            productId: p.localId!,
+          })),
+        }),
       });
-      if (producto.localId) {
-        await pedir(
-          `/api/basket/items/${creado.id}/match/${producto.storeId}`,
-          {
-            method: "PUT",
-            body: JSON.stringify({ productId: producto.localId }),
-          },
-        );
-      }
       return creado;
     },
     onSuccess: () => invalidar(qc, ["basket"], ["summary"]),

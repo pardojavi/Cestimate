@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronDown,
   Link2Off,
@@ -6,8 +6,10 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  Search,
   Star,
   Trash2,
+  X,
 } from "lucide-react";
 import type { BasketSummary } from "@cestimate/shared";
 import { haceTiempo, formatoEUR } from "@cestimate/shared";
@@ -342,11 +344,25 @@ function SelectorTienda({
   item: ItemCesta;
 }) {
   const [abierto, setAbierto] = useState(false);
+  const [texto, setTexto] = useState("");
+  const [consolidado, setConsolidado] = useState("");
   const match = item.matches[tienda.id];
   const elegir = useElegirProducto();
   const quitar = useQuitarProducto();
-  const { data, isFetching } = useBusqueda(item.genericName, {
-    enabled: abierto,
+
+  // Debounce: busca en la tienda con el texto escrito (400 ms de calma).
+  useEffect(() => {
+    const t = setTimeout(() => setConsolidado(texto.trim()), 400);
+    return () => clearTimeout(t);
+  }, [texto]);
+
+  // Con texto propio se busca solo en esta tienda; sin él, por el nombre
+  // del artículo (comparte caché con la pestaña Buscar).
+  const usaTexto = consolidado.length >= 2;
+  const consulta = usaTexto ? consolidado : item.genericName;
+  const { data, isFetching } = useBusqueda(consulta, {
+    enabled: abierto && consulta.trim().length >= 2,
+    stores: usaTexto ? tienda.id : undefined,
   });
 
   const candidatos =
@@ -405,6 +421,28 @@ function SelectorTienda({
 
       {abierto && (
         <div className="tarjeta" style={{ marginTop: 6 }}>
+          <div className="campo-selector">
+            <Search size={16} aria-hidden />
+            <input
+              type="search"
+              value={texto}
+              onChange={(e) => setTexto(e.target.value)}
+              placeholder={`¿No lo encuentras? Busca en ${tienda.name}…`}
+              aria-label={`Buscar en ${tienda.name}`}
+              autoComplete="off"
+            />
+            {texto && (
+              <button
+                type="button"
+                className="btn neutro mini"
+                onClick={() => setTexto("")}
+                aria-label="Borrar búsqueda"
+              >
+                <X size={14} aria-hidden />
+              </button>
+            )}
+          </div>
+
           {isFetching && (
             <div
               className="cargando"
@@ -416,8 +454,17 @@ function SelectorTienda({
 
           {!isFetching && candidatos.length === 0 && (
             <div className="vacio" style={{ padding: 12 }}>
-              Sin candidatos en {tienda.name}. Búscalos en Buscar y añádelos a
-              la cesta.
+              {usaTexto ? (
+                <>
+                  Sin resultados en {tienda.name} para «{consolidado}». Prueba
+                  con otro texto.
+                </>
+              ) : (
+                <>
+                  Sin candidatos en {tienda.name} para «{item.genericName}».
+                  Escribe arriba otro texto para buscar.
+                </>
+              )}
             </div>
           )}
 
