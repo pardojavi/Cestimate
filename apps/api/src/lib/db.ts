@@ -107,6 +107,13 @@ CREATE TABLE IF NOT EXISTS catalog_meta (
   store_id TEXT PRIMARY KEY,
   refreshed_at TEXT
 );
+
+-- Identificación de códigos de barras vía Open Food Facts (solo nombre/marca).
+CREATE TABLE IF NOT EXISTS barcode_cache (
+  code TEXT PRIMARY KEY,
+  payload TEXT NOT NULL,
+  fetched_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `;
 
 const TIENDAS_PREDEFINIDAS = [

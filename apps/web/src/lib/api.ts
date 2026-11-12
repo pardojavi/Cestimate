@@ -445,6 +445,24 @@ export function useTiendaMutations() {
   };
 }
 
+export interface IdentificacionCodigo {
+  code: string;
+  encontrado: boolean;
+  nombre: string | null;
+  marca: string | null;
+  consulta: string | null;
+  fuente: string;
+  fuenteUrl: string;
+  fechaConsulta: string;
+}
+
+export function useIdentificarCodigo() {
+  return useMutation({
+    mutationFn: (codigo: string) =>
+      pedir<IdentificacionCodigo>(`/api/barcode/${encodeURIComponent(codigo)}`),
+  });
+}
+
 export function useBorrarCache() {
   const qc = useQueryClient();
   return useMutation({

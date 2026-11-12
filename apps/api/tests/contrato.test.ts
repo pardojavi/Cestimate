@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   coincideFlex,
+  esCodigoBarrasValido,
+  normalizarCodigoBarras,
   tokenizar,
   terminosExigidos,
   zAldiResponse,
@@ -19,6 +21,7 @@ import {
   extraerJsonLd,
 } from "../src/adapters/lidl.js";
 import { extraerFormato, normalizarUnidad } from "../src/adapters/types.js";
+import { aIdentificacion } from "../src/lib/barcode.js";
 
 /**
  * Tests de contrato por adaptador con respuestas grabadas (§2, §9).
@@ -322,6 +325,89 @@ describe("Búsqueda flexible", () => {
       coincideFlex("Leche Entera Brik", tokenizar("leche entera 1l")),
     ).toBe(true);
     expect(coincideFlex("", tokenizar(""))).toBe(false);
+  });
+});
+
+describe("Open Food Facts (identificación por código de barras)", () => {
+  it("convierte una respuesta real en identificación con nombre y marca", () => {
+    const datos = leer<unknown>("openfoodfacts-found.json");
+    const ident = aIdentificacion("8402001002083", datos);
+
+    expect(ident.encontrado).toBe(true);
+    expect(ident.nombre).toBe("Leche Entera");
+    expect(ident.marca).toBe("MERCADONA");
+    expect(ident.consulta).toBe("Leche Entera MERCADONA");
+    expect(ident.fuente).toBe("Open Food Facts");
+    expect(ident.fuenteUrl).toBe(
+      "https://world.openfoodfacts.org/product/8402001002083",
+    );
+    expect(Number.isNaN(Date.parse(ident.fechaConsulta))).toBe(false);
+  });
+
+  it("marca «no encontrado» cuando OFF devuelve status 0", () => {
+    const datos = leer<unknown>("openfoodfacts-notfound.json");
+    const ident = aIdentificacion("99999999999999", datos);
+
+    expect(ident.encontrado).toBe(false);
+    expect(ident.nombre).toBeNull();
+    expect(ident.marca).toBeNull();
+    expect(ident.consulta).toBeNull();
+    expect(ident.code).toBe("99999999999999");
+    expect(ident.fuente).toBe("Open Food Facts");
+  });
+
+  it("no inventa identificación con una respuesta malformada", () => {
+    const ident = aIdentificacion("8402001002083", { foo: "bar" });
+    expect(ident.encontrado).toBe(false);
+    expect(ident.consulta).toBeNull();
+  });
+
+  it("prefiere product_name_es y recorta la marca a la primera", () => {
+    const ident = aIdentificacion("123", {
+      status: 1,
+      product: {
+        product_name: "Leche",
+        product_name_es: "Leche Entera",
+        brands: "MERCADONA,marca secundaria",
+      },
+    });
+    expect(ident.nombre).toBe("Leche Entera");
+    expect(ident.marca).toBe("MERCADONA");
+    expect(ident.consulta).toBe("Leche Entera MERCADONA");
+  });
+});
+
+describe("Utilidades de formato", () => {
+  it("valida códigos de barras (longitud + checksum EAN-13/8)", () => {
+    // EAN-13 real de Mercadona (leche entera 1 L) — checksum correcto.
+    expect(esCodigoBarrasValido("8402001002083")).toBe(true);
+    // EAN-13 de pan de Mercadona — checksum correcto.
+    expect(esCodigoBarrasValido("8480000832023")).toBe(true);
+    // EAN-8 con checksum correcto (96385074).
+    expect(esCodigoBarrasValido("96385074")).toBe(true);
+    // UPC-A (12) e ITF-14 (14): solo se valida la longitud.
+    expect(esCodigoBarrasValido("012345678905")).toBe(true);
+    expect(esCodigoBarrasValido("12345678901234")).toBe(true);
+
+    // Checksum incorrecto.
+    expect(esCodigoBarrasValido("8402001002084")).toBe(false);
+    expect(esCodigoBarrasValido("96385075")).toBe(false);
+    // Longitudes inválidas.
+    expect(esCodigoBarrasValido("1234567")).toBe(false);
+    expect(esCodigoBarrasValido("123456789012345")).toBe(false);
+    // No numérico o vacío.
+    expect(esCodigoBarrasValido("abc")).toBe(false);
+    expect(esCodigoBarrasValido("")).toBe(false);
+    // Se toleran espacios y guiones.
+    expect(esCodigoBarrasValido(" 8402001002083 ")).toBe(true);
+    expect(esCodigoBarrasValido("8402-0010-02083")).toBe(true);
+  });
+
+  it("normaliza el código devolviendo null si no es válido", () => {
+    expect(normalizarCodigoBarras(" 8402001002083 ")).toBe("8402001002083");
+    expect(normalizarCodigoBarras("8402-0010-02083")).toBe("8402001002083");
+    expect(normalizarCodigoBarras("12345")).toBeNull();
+    expect(normalizarCodigoBarras("8402001002084")).toBeNull();
   });
 });
 

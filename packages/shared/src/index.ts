@@ -343,6 +343,52 @@ export function coincideFlex(texto: string, terminos: string[]): boolean {
   return terminosExigidos(terminos).every((t) => norm.includes(t));
 }
 
+/**
+ * ¿Es un código de barras de longitud válida para EAN-13 (13), EAN-8 (8),
+ * UPC-A (12) o ITF-14 (14)? Solo se aceptan dígitos. Para EAN-13 y EAN-8
+ * se valida además el dígito de control (checksum); para UPC-A e ITF-14,
+ * solo la longitud (son formatos menos usados en el lineal español).
+ */
+export function esCodigoBarrasValido(codigo: string): boolean {
+  const limpio = codigo.trim().replace(/[\s-]/g, "");
+  if (!/^\d+$/.test(limpio)) return false;
+  switch (limpio.length) {
+    case 8:
+      return digitoControlEAN8(limpio);
+    case 13:
+      return digitoControlEAN13(limpio);
+    case 12:
+    case 14:
+      return true;
+    default:
+      return false;
+  }
+}
+
+/** Dígito de control correcto de un EAN-8 (8 dígitos, el último es el dígito de control). */
+function digitoControlEAN8(codigo: string): boolean {
+  let suma = 0;
+  for (let i = 0; i < 7; i++) {
+    suma += Number(codigo[i]) * (i % 2 === 0 ? 3 : 1);
+  }
+  return Number(codigo[7]) === (10 - (suma % 10)) % 10;
+}
+
+/** Dígito de control correcto de un EAN-13 (13 dígitos, el último es el dígito de control). */
+function digitoControlEAN13(codigo: string): boolean {
+  let suma = 0;
+  for (let i = 0; i < 12; i++) {
+    suma += Number(codigo[i]) * (i % 2 === 0 ? 1 : 3);
+  }
+  return Number(codigo[12]) === (10 - (suma % 10)) % 10;
+}
+
+/** Devuelve el código limpio (sin espacios ni guiones) o null si no es válido. */
+export function normalizarCodigoBarras(codigo: string): string | null {
+  const limpio = codigo.trim().replace(/[\s-]/g, "");
+  return esCodigoBarrasValido(limpio) ? limpio : null;
+}
+
 /** Divisa es-ES. */
 export function formatoEUR(valor: number): string {
   return new Intl.NumberFormat("es-ES", {

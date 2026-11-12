@@ -8,6 +8,7 @@ import { registrarCesta } from "./routes/basket.js";
 import { registrarGuardadas } from "./routes/saved.js";
 import { registrarEstadisticas } from "./routes/stats.js";
 import { registrarAjustes } from "./routes/settings.js";
+import { registrarCodigoBarras } from "./routes/barcode.js";
 
 /**
  * Servidor único de Cestimate (§2): Fastify + SQLite, un proceso.
@@ -49,6 +50,7 @@ async function main(): Promise<void> {
   registrarGuardadas(app);
   registrarEstadisticas(app);
   registrarAjustes(app);
+  registrarCodigoBarras(app);
 
   app.get("/api/health", async () => ({ ok: true, name: "Cestimate" }));
 

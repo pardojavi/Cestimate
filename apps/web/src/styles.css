@@ -1283,6 +1283,253 @@ details.detalle-caja > summary {
   padding: 4px 8px;
 }
 
+/* ------------------- Escaneo de código de barras ------------------ */
+
+/* Botón de escaneo dentro del campo de búsqueda (derecha) */
+.btn-escanear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-escanear:hover,
+.btn-escanear[aria-expanded="true"] {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+.btn-escanear:focus-visible {
+  outline: 2px solid var(--info);
+  outline-offset: 2px;
+}
+
+/* El campo necesita padding derecho para no solapar con el botón */
+.busqueda input {
+  padding-right: 44px;
+}
+
+/* Panel del escáner (tarjeta bajo el campo) */
+.panel-escaner {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel-escaner__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.panel-escaner__cabecera strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.btn-escaner-cerrar {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-escaner-cerrar:hover {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+/* Zona de vídeo */
+.panel-escaner__video {
+  position: relative;
+  background: var(--ink);
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--on-ink-soft);
+  font-size: 13px;
+}
+
+.panel-escaner__video--cargando {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.panel-escaner__video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.panel-escaner__superpuesto {
+  position: absolute;
+  inset: 0;
+  background: rgba(30, 42, 34, 0.82);
+  color: var(--on-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+  font-size: 14px;
+}
+
+.panel-escaner__pista {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* Entrada manual de respaldo */
+.panel-escaner__manual {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo-etiqueta {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.panel-escaner__fila-manual {
+  display: flex;
+  gap: 8px;
+}
+
+.panel-escaner__fila-manual input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  padding: 0 12px;
+  font-family: var(--fuente-precio);
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.panel-escaner__fila-manual input:focus {
+  outline: 2px solid var(--info);
+  outline-offset: 1px;
+  border-color: var(--info);
+}
+
+.panel-escaner__fila-manual .btn {
+  flex-shrink: 0;
+}
+
+/* Canvas oculto para la captura */
+.oculto-visual {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Spinner */
+.girar {
+  animation: girar 1s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .girar {
+    animation: none;
+  }
+}
+
+/* Chip de identificación (transparencia: código · nombre · fuente) */
+.chip-identificacion {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--info-bg);
+  border: 1px solid var(--info);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--ink);
+  margin-top: 10px;
+}
+
+.chip-identificacion svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--info);
+}
+
+.chip-identificacion span {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.chip-identificacion strong {
+  font-family: var(--fuente-precio);
+  font-weight: 700;
+}
+
+.chip-identificacion a {
+  color: var(--info);
+  font-weight: 600;
+}
+
+.chip-identificacion__cerrar {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.chip-identificacion__cerrar:hover {
+  background: rgba(43, 93, 140, 0.12);
+  color: var(--ink);
+}
+
 @media (min-width: 720px) {
   .contenido {
     padding: 20px 16px;

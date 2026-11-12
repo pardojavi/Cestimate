@@ -98,6 +98,14 @@ La web es **estática** (GitHub Pages) y la API corre en un servidor con Node y 
 | **Aldi**      | API de búsqueda Algolia pública (clave embebida en su propio JS): `an_prd_es_es_pen_products2`         | Catálogo online de aldi.es (surtido **parcial** frente a la tienda física; no todos los productos del lineal).                                                         | Su `robots.txt` no prohíbe ni la búsqueda ni las páginas de producto.                                                                                                                                                                                                                                                                                        |
 | **Lidl**      | Sitemap de productos (`product_sitemap.xml.gz`, ~7.700 URLs) + JSON-LD `Product` de cada página `/p/…` | Catálogo **online** de lidl.es: mayoritariamente **no alimentación** (la alimentación suele estar en el folleto semanal). Se leen como máximo 5 páginas por búsqueda.  | Su `robots.txt` permite `/p/`.                                                                                                                                                                                                                                                                                                                               |
 
+### Escaneo de códigos de barras
+
+La pestaña **Buscar** permite escanear el código de barras de un producto con la cámara del móvil. El código se identifica con **Open Food Facts** (`GET https://world.openfoodfacts.org/api/v2/product/{code}.json`), una base de datos abierta y gratuita que aporta **solo el nombre y la marca** del producto. Con esa identificación se lanza la búsqueda normal en las tiendas: **los precios siguen saliendo exclusivamente de las webs de cada tienda**, con su enlace y fecha de consulta.
+
+- Open Food Facts se consulta con User-Agent identificable y timeout; los resultados (encontrados o no) se cachean en SQLite ~30 días.
+- Si OFF no conoce el código, la app muestra un aviso y permite escribir el nombre del producto a mano.
+- El decodificador usa `BarcodeDetector` nativo cuando está disponible (Chrome Android); en Safari/iOS recurre a `zxing-wasm` con el `.wasm` alojado **en local** (`apps/web/public/zxing_reader.wasm`), sin depender de CDN.
+
 Otras buenas prácticas aplicadas: timeout de 10 s por petición, reintentos con backoff, errores 4xx sin reintentar, y caché con TTL configurable.
 
 > **Aviso legal:** este proyecto es una herramienta personal de comparación. Los precios pueden variar por tienda, fecha y disponibilidad; comprueba siempre el enlace de origen. Antes de publicar la marca, comprueba disponibilidad de dominio y marcas (OEPM) según el apartado 0 del AGENT.md.
@@ -107,7 +115,8 @@ Otras buenas prácticas aplicadas: timeout de 10 s por petición, reintentos con
 ```
 apps/api/        Fastify + SQLite (better-sqlite3) + adaptadores por tienda
   src/adapters/  mercadona.ts · consum.ts · aldi.ts · lidl.ts
-  src/routes/    search · basket · saved · stats · stores · settings
+  src/lib/       barcode.ts (Open Food Facts: identificación por EAN)
+  src/routes/    search · basket · saved · stats · stores · settings · barcode
   tests/         contrato.test.ts (fixtures reales) · cesta.test.ts
 apps/web/        React + Vite + TanStack Query + Recharts (5 pestañas + Ajustes)
 packages/shared/ Tipos, esquemas Zod y constantes de marca compartidos

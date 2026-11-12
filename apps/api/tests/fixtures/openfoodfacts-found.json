@@ -1,0 +1,13 @@
+{
+  "code": "8402001002083",
+  "status": 1,
+  "status_verbose": "product found",
+  "product": {
+    "code": "8402001002083",
+    "product_name": "Leche Entera",
+    "product_name_es": "Leche Entera",
+    "brands": "MERCADONA",
+    "quantity": "1 l",
+    "image_front_small_url": "https://images.openfoodfacts.org/images/products/840/200/100/2083/front_es.3.200.jpg"
+  }
+}
