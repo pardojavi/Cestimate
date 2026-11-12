@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, Loader2, ScanBarcode, X } from "lucide-react";
+import { Camera, Loader2, RotateCw, ScanBarcode, X } from "lucide-react";
 import { esCodigoBarrasValido } from "@cestimate/shared";
 
 /**
@@ -13,12 +13,26 @@ import { esCodigoBarrasValido } from "@cestimate/shared";
  * superpuesto): si no, `videoRef.current` sería null al resolver
  * `getUserMedia` y el panel se quedaría en «iniciando» para siempre.
  *
+ * Todos los pasos críticos llevan timeout y el panel ofrece **Reintentar**:
+ * nunca se queda «pensando» sin salida (permiso denegado, cámara colgada,
+ * descarga del lector lenta…).
+ *
  * El bucle de captura va a ~4 img/s (cada 250 ms). Al detectar un código
  * válido se llama `onDetectado(codigo)` y se detiene la cámara.
  */
 type Estado = "iniciando" | "escaneando" | "sin-camara" | "error";
 
 type Detector = (canvas: HTMLCanvasElement) => Promise<string | null>;
+
+/** Límite de tiempo para una promesa; si expira, se rechaza con `TimeoutError`. */
+function conLimite<T>(promesa: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promesa,
+    new Promise<never>((_, rechazar) =>
+      setTimeout(() => rechazar(new Error("TimeoutError")), ms),
+    ),
+  ]);
+}
 
 export default function Escaner({
   onDetectado,
@@ -32,6 +46,8 @@ export default function Escaner({
   const [estado, setEstado] = useState<Estado>("iniciando");
   const [mensaje, setMensaje] = useState("");
   const [manual, setManual] = useState("");
+  // Número de intento: sirve de «key» del efecto para poder reintentar.
+  const [intento, setIntento] = useState(0);
 
   const detectarRef = useRef<Detector | null>(null);
 
@@ -47,8 +63,12 @@ export default function Escaner({
     let stream: MediaStream | null = null;
     let temporizador: ReturnType<typeof setInterval> | null = null;
 
+    setEstado("iniciando");
+    setMensaje("");
+
     async function iniciar() {
-      // 1. Cámara (guard: mediaDevices solo existe en contextos seguros)
+      // 1. Cámara (guard: mediaDevices solo existe en contextos seguros).
+      //    Límite 45 s: da tiempo al diálogo de permiso de iOS/Safari.
       if (!navigator.mediaDevices?.getUserMedia) {
         setEstado("sin-camara");
         setMensaje(
@@ -57,16 +77,22 @@ export default function Escaner({
         return;
       }
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-        });
-      } catch {
-        if (!cancelado) {
-          setEstado("sin-camara");
-          setMensaje(
-            "No se pudo acceder a la cámara. Escribe el código a mano.",
-          );
-        }
+        stream = await conLimite(
+          navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" },
+          }),
+          45_000,
+        );
+      } catch (error) {
+        if (cancelado) return;
+        const esTimeout =
+          error instanceof Error && error.message === "TimeoutError";
+        setEstado("sin-camara");
+        setMensaje(
+          esTimeout
+            ? "La cámara no respondió (¿has concedido el permiso?). Puedes reintentar o escribir el código a mano."
+            : "No se pudo acceder a la cámara. Escribe el código a mano.",
+        );
         return;
       }
       if (cancelado) {
@@ -77,26 +103,27 @@ export default function Escaner({
       if (!video) return;
       video.srcObject = stream;
       try {
-        await video.play();
+        // Límite 10 s: si no arranca, no bloqueamos el resto del panel.
+        await conLimite(video.play(), 10_000);
       } catch {
-        if (!cancelado) {
-          setEstado("error");
-          setMensaje("No se pudo reproducir la vista de la cámara.");
-        }
+        if (cancelado) return;
+        setEstado("error");
+        setMensaje(
+          "No se pudo reproducir la vista de la cámara. Puedes reintentar o escribir el código a mano.",
+        );
         return;
       }
       if (cancelado) return;
 
-      // 2. Detector (nativo o zxing-wasm)
+      // 2. Detector (nativo o zxing-wasm; el WASM puede tardar en bajar).
       try {
-        detectarRef.current = await crearDetector();
+        detectarRef.current = await conLimite(crearDetector(), 20_000);
       } catch {
-        if (!cancelado) {
-          setEstado("error");
-          setMensaje(
-            "No se pudo inicializar el lector de códigos. Escribe el código a mano.",
-          );
-        }
+        if (cancelado) return;
+        setEstado("error");
+        setMensaje(
+          "No se pudo cargar el lector de códigos. Puedes reintentar o escribir el código a mano.",
+        );
         return;
       }
       if (cancelado) return;
@@ -129,7 +156,7 @@ export default function Escaner({
       if (temporizador) clearInterval(temporizador);
       if (stream) stream.getTracks().forEach((t) => t.stop());
     };
-  }, []);
+  }, [intento]);
 
   const enviarManual = useCallback(() => {
     const limpio = manual.trim().replace(/[\s-]/g, "");
@@ -141,6 +168,11 @@ export default function Escaner({
       );
     }
   }, [manual, onDetectado]);
+
+  const reintenta = useCallback(() => setIntento((n) => n + 1), []);
+
+  const fallo =
+    (estado === "sin-camara" || estado === "error") && mensaje !== "";
 
   return (
     <div
@@ -167,14 +199,17 @@ export default function Escaner({
         <div className="panel-escaner__video">
           <video ref={videoRef} playsInline muted autoPlay />
           {estado === "iniciando" && (
-            <div className="panel-escaner__superpuesto panel-escaner__superpuesto--carga">
+            <div className="panel-escaner__superpuesto">
               <Loader2 size={22} aria-hidden className="girar" />
               <span>Pidiendo permiso de cámara…</span>
             </div>
           )}
           {estado === "error" && (
             <div className="panel-escaner__superpuesto" role="alert">
-              {mensaje}
+              <span>{mensaje}</span>
+              <button className="btn reintentar mini" onClick={reintenta}>
+                <RotateCw size={15} aria-hidden /> Reintentar
+              </button>
             </div>
           )}
         </div>
@@ -186,6 +221,9 @@ export default function Escaner({
             <Camera size={15} aria-hidden /> Sin cámara
           </strong>
           <span>{mensaje}</span>
+          <button className="btn reintentar mini" onClick={reintenta}>
+            <RotateCw size={15} aria-hidden /> Reintentar
+          </button>
         </div>
       )}
 
@@ -224,6 +262,7 @@ export default function Escaner({
       </div>
 
       <canvas ref={canvasRef} className="oculto-visual" aria-hidden />
+      {fallo && <span className="visually-hidden">{mensaje}</span>}
     </div>
   );
 }
