@@ -64,9 +64,13 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
     identificar.mutate(codigo, {
       onSuccess: (ident) => {
         setIdentificacion(ident);
-        if (ident.encontrado && ident.consulta) {
-          setTexto(ident.consulta);
-          setConsulta(ident.consulta);
+        // Se busca solo por el nombre del producto: la marca (p. ej.
+        // «MERCADONA») no aparece en los nombres de las tiendas (usan su
+        // propia marca: Hacendado, Consum…), así que incluirla vaciaría la
+        // búsqueda. La marca se muestra en el chip de transparencia.
+        if (ident.encontrado && ident.nombre) {
+          setTexto(ident.nombre);
+          setConsulta(ident.nombre);
           setMostrarEscaneador(false);
         }
         // Si no se encontró, el panel queda abierto: el aviso §6.4 invita a
