@@ -1401,6 +1401,12 @@ details.detalle-caja > summary {
   font-size: 14px;
 }
 
+/* Superpuesto de carga: icono + texto en columna */
+.panel-escaner__superpuesto--carga {
+  flex-direction: column;
+  gap: 8px;
+}
+
 .panel-escaner__pista {
   font-size: 13px;
   color: var(--ink-soft);

@@ -9,6 +9,10 @@ import { esCodigoBarrasValido } from "@cestimate/shared";
  * si no está disponible o no soporta EAN, usa `zxing-wasm` con el `.wasm`
  * alojado en local (`public/zxing_reader.wasm`), sin depender de CDN.
  *
+ * El `<video>` se renderiza desde el inicio (mientras carga, tapado por el
+ * superpuesto): si no, `videoRef.current` sería null al resolver
+ * `getUserMedia` y el panel se quedaría en «iniciando» para siempre.
+ *
  * El bucle de captura va a ~4 img/s (cada 250 ms). Al detectar un código
  * válido se llama `onDetectado(codigo)` y se detiene la cámara.
  */
@@ -31,13 +35,27 @@ export default function Escaner({
 
   const detectarRef = useRef<Detector | null>(null);
 
+  // Callback en un ref: así el efecto de la cámara no se re-ejecuta (y no
+  // reinicia el stream) cuando el padre re-renderiza con una función nueva.
+  const onDetectadoRef = useRef(onDetectado);
+  useEffect(() => {
+    onDetectadoRef.current = onDetectado;
+  }, [onDetectado]);
+
   useEffect(() => {
     let cancelado = false;
     let stream: MediaStream | null = null;
     let temporizador: ReturnType<typeof setInterval> | null = null;
 
     async function iniciar() {
-      // 1. Cámara
+      // 1. Cámara (guard: mediaDevices solo existe en contextos seguros)
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setEstado("sin-camara");
+        setMensaje(
+          "Este navegador no permite usar la cámara. Escribe el código a mano.",
+        );
+        return;
+      }
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment" },
@@ -98,7 +116,7 @@ export default function Escaner({
         void detectarRef.current(canvas).then((codigo) => {
           if (codigo && esCodigoBarrasValido(codigo)) {
             if (temporizador) clearInterval(temporizador);
-            onDetectado(codigo);
+            onDetectadoRef.current(codigo);
           }
         });
       }, 250);
@@ -111,7 +129,7 @@ export default function Escaner({
       if (temporizador) clearInterval(temporizador);
       if (stream) stream.getTracks().forEach((t) => t.stop());
     };
-  }, [onDetectado]);
+  }, []);
 
   const enviarManual = useCallback(() => {
     const limpio = manual.trim().replace(/[\s-]/g, "");
@@ -143,16 +161,17 @@ export default function Escaner({
         </button>
       </div>
 
-      {estado === "iniciando" && (
-        <div className="panel-escaner__video panel-escaner__video--cargando">
-          <Loader2 size={22} aria-hidden className="girar" />
-          <span>Iniciando cámara…</span>
-        </div>
-      )}
-
-      {(estado === "escaneando" || estado === "error") && (
+      {/* Zona de vídeo: el <video> está en el DOM desde el primer render
+          (tapado por el superpuesto mientras carga). */}
+      {estado !== "sin-camara" && (
         <div className="panel-escaner__video">
           <video ref={videoRef} playsInline muted autoPlay />
+          {estado === "iniciando" && (
+            <div className="panel-escaner__superpuesto panel-escaner__superpuesto--carga">
+              <Loader2 size={22} aria-hidden className="girar" />
+              <span>Pidiendo permiso de cámara…</span>
+            </div>
+          )}
           {estado === "error" && (
             <div className="panel-escaner__superpuesto" role="alert">
               {mensaje}
