@@ -1,13 +1,20 @@
 import { ExternalLink, Plus } from "lucide-react";
 import type { StoreProduct } from "@cestimate/shared";
 import { haceTiempo, formatoEUR } from "@cestimate/shared";
+import { formatoPeso, precioPorPeso } from "../lib/peso";
 
 /**
- * Fila de producto (ESTILOS.md §6.3): nombre (15 / 700), línea mono
+ * Fila de resultado (ESTILOS.md §6.3): nombre (15 / 700), línea mono
  * «formato · precio unitario», precio a la derecha (Space Mono 18 / 700)
  * y botón «+». Si es el más barato: fondo --best, precio --best e
  * insignia «Precio más bajo». Cada precio lleva enlace y tiempo de
  * consulta («hace 2 min», Space Mono 11,5).
+ *
+ * Con `pesoKg` (modo «comparar por peso») los productos que cotizan por
+ * kilo muestran como precio principal el **calculado para ese peso**
+ * (€/kg × peso) con la etiqueta «para X kg» debajo; el €/kg real sigue en
+ * la línea mono para poder verificarlo. Los no comparables (€/L, €/ud)
+ * conservan su precio real.
  */
 export default function Producto({
   producto,
@@ -16,6 +23,7 @@ export default function Producto({
   anadiendo,
   seleccionado,
   onToggle,
+  pesoKg,
 }: {
   producto: StoreProduct;
   destacado?: boolean;
@@ -25,6 +33,8 @@ export default function Producto({
   seleccionado?: boolean;
   /** Si no se pasa, no se muestra la casilla. */
   onToggle?: (p: StoreProduct) => void;
+  /** Peso en kg del modo «comparar por peso» (null: precio real). */
+  pesoKg?: number | null;
 }) {
   const datos = [
     producto.format,
@@ -33,6 +43,15 @@ export default function Producto({
   ]
     .filter(Boolean)
     .join(" · ");
+
+  const unit = producto.unitPrice;
+  const calculado = pesoKg != null ? precioPorPeso(producto, pesoKg) : null;
+  const precioVisible = calculado ?? producto.price;
+  // Transparencia: el precio calculado explica de dónde sale.
+  const tituloCalculo =
+    calculado !== null && unit && pesoKg != null
+      ? `Calculado: ${formatoEUR(unit.value)}/${unit.unit} × ${formatoPeso(pesoKg)} kg`
+      : undefined;
 
   return (
     <article className={destacado ? "producto destacado" : "producto"}>
@@ -93,7 +112,20 @@ export default function Producto({
             />
           </label>
         )}
-        <span className="precio">{formatoEUR(producto.price)}</span>
+        <span
+          className="precio"
+          title={tituloCalculo}
+          aria-label={
+            calculado !== null && pesoKg != null
+              ? `${formatoEUR(calculado)} para ${formatoPeso(pesoKg)} kg (calculado con el precio por kilo de la tienda)`
+              : undefined
+          }
+        >
+          {formatoEUR(precioVisible)}
+        </span>
+        {calculado !== null && pesoKg != null && (
+          <span className="producto__peso">para {formatoPeso(pesoKg)} kg</span>
+        )}
         {onAnadir && (
           <button
             className="btn-anadir"

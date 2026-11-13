@@ -16,6 +16,12 @@ import {
   useTiendas,
   type IdentificacionCodigo,
 } from "../lib/api";
+import {
+  cotizaPorKilo,
+  formatoPeso,
+  parsearPesoKg,
+  precioPorPeso,
+} from "../lib/peso";
 import type { StoreProduct, StoreSearchResult } from "@cestimate/shared";
 import Producto from "../componentes/Producto";
 
@@ -34,6 +40,8 @@ const Escaner = lazy(() => import("../componentes/Escaner"));
 export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
   const [texto, setTexto] = useState("");
   const [consulta, setConsulta] = useState("");
+  /** Texto del campo «comparar por peso» de la pestaña Buscar. */
+  const [pesoTexto, setPesoTexto] = useState("");
   const [marcados, setMarcados] = useState<Record<string, StoreProduct>>({});
   const [mostrarEscaneador, setMostrarEscaneador] = useState(false);
   const [identificacion, setIdentificacion] =
@@ -54,13 +62,34 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
   // Para el botón: incluye también los refetch con datos ya en pantalla.
   const buscando = cargando || isFetching;
 
-  // Precio más bajo de toda la respuesta (para la insignia).
-  const masBarato = data?.results
-    .flatMap((r) => r.products)
-    .reduce<StoreProduct | null>(
-      (min, p) => (min === null || p.price < min.price ? p : min),
-      null,
-    );
+  // Peso elegido: válido (> 0) y solo si la búsqueda tiene €/kg; si no,
+  // el modo peso no gobierna nada (la insignia vuelve al precio real).
+  const pesoKg = parsearPesoKg(pesoTexto);
+
+  // Productos de la respuesta actual (insignia y control de peso).
+  const productos = data?.results.flatMap((r) => r.products) ?? [];
+  const hayPorKilo = productos.some(cotizaPorKilo);
+  const pesoActivo = pesoKg !== null && hayPorKilo ? pesoKg : null;
+  // Resultados sin €/kg: no se pueden calcular en kilos y se quedan a
+  // su precio real (nunca se inventa precio, §4.3).
+  const sinPorKilo =
+    pesoActivo !== null ? productos.filter((p) => !cotizaPorKilo(p)).length : 0;
+
+  // Precio más bajo de toda la respuesta (para la insignia). Con peso
+  // activo solo compiten los productos que cotizan por kg y se comparan
+  // los precios **calculados para ese peso**: es la comparación del
+  // mismo kilaje entre tiendas.
+  const masBarato = productos.reduce<StoreProduct | null>((min, p) => {
+    if (pesoActivo === null) {
+      return min === null || p.price < min.price ? p : min;
+    }
+    if (!cotizaPorKilo(p)) return min;
+    const precio = precioPorPeso(p, pesoActivo);
+    if (precio === null) return min;
+    if (min === null) return p;
+    const precioMin = precioPorPeso(min, pesoActivo);
+    return precioMin !== null && precio < precioMin ? p : min;
+  }, null);
 
   function buscar(e: React.FormEvent) {
     e.preventDefault();
@@ -166,6 +195,43 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
         </button>
       </form>
 
+      {/* Comparar por peso (§6.2/§6.3): solo si la respuesta tiene €/kg.
+          El peso pone el precio calculado como principal en cada fila que
+          cotice por kilo y decide la insignia «Precio más bajo». */}
+      {data && hayPorKilo && (
+        <>
+          <div className="fila-peso">
+            <label htmlFor="peso-kg" className="fila-peso__label">
+              Comparar por peso
+            </label>
+            <div className="campo-peso">
+              <input
+                id="peso-kg"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                placeholder="1,5"
+                value={pesoTexto}
+                onChange={(e) => setPesoTexto(e.target.value)}
+                aria-describedby="peso-ayuda"
+              />
+              <span aria-hidden="true">kg</span>
+            </div>
+          </div>
+          <p className="nota-seccion" id="peso-ayuda">
+            {pesoActivo !== null
+              ? `Precio calculado con el €/kg de cada tienda${
+                  sinPorKilo > 0
+                    ? `; ${sinPorKilo} sin €/kg se muestra${
+                        sinPorKilo === 1 ? "" : "n"
+                      } a su precio real`
+                    : ""
+                }.`
+              : "Escribe un peso en kg para comparar todos los productos al mismo kilaje."}
+          </p>
+        </>
+      )}
+
       {mostrarEscaneador && (
         <Suspense
           fallback={
@@ -270,9 +336,13 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
       </p>
 
       {/* Región viva permanente: anuncia el estado de la consulta aunque
-          el contenido visual cambie (los esqueletos son decorativos). */}
+          el contenido visual cambie (los esqueletos son decorativos), y el
+          peso activo del modo «comparar por peso». */}
       <span className="visually-hidden" role="status">
         {isFetching ? "Consultando precios…" : ""}
+        {pesoActivo !== null
+          ? ` Comparando a ${formatoPeso(pesoActivo)} kg.`
+          : ""}
       </span>
 
       {isError && (
@@ -361,6 +431,7 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
               anadiendo={anadir.isPending}
               marcados={marcados}
               onToggle={alternar}
+              pesoKg={pesoActivo}
             />
           ))}
         </>
@@ -431,6 +502,7 @@ function GrupoTienda({
   anadiendo,
   marcados,
   onToggle,
+  pesoKg,
 }: {
   resultado: StoreSearchResult;
   destacadoId?: string;
@@ -439,6 +511,8 @@ function GrupoTienda({
   anadiendo: boolean;
   marcados: Record<string, StoreProduct>;
   onToggle: (p: StoreProduct) => void;
+  /** Peso en kg del modo «comparar por peso» (null: precios reales). */
+  pesoKg?: number | null;
 }) {
   const color = colorDeTienda(resultado.storeId);
 
@@ -487,6 +561,7 @@ function GrupoTienda({
             anadiendo={anadiendo}
             seleccionado={!!marcados[`${p.storeId}:${p.externalId}`]}
             onToggle={onToggle}
+            pesoKg={pesoKg}
           />
         ))}
 
