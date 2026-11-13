@@ -126,6 +126,16 @@ export default function Producto({
         {calculado !== null && pesoKg != null && (
           <span className="producto__peso">para {formatoPeso(pesoKg)} kg</span>
         )}
+        {/* Con peso activo, las filas que no cotizan por kg se explican a
+            sí mismas: su precio no cambia porque no es calculable. */}
+        {calculado === null && pesoKg != null && (
+          <span
+            className="producto__peso producto__peso--nd"
+            title="Sin precio por kilo: se muestra el precio real"
+          >
+            no cotiza por kg
+          </span>
+        )}
         {onAnadir && (
           <button
             className="btn-anadir"

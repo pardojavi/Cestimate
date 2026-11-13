@@ -546,46 +546,100 @@ button {
   font-family: var(--fuente-precio);
 }
 
-/* --------- Comparar por peso (pestaña Buscar, §6.2/§6.3) --------- */
+/* --------- Comparar por peso (pestaña Buscar, §6.2/§6.5) --------- */
 
-/* Etiqueta a la izquierda, campo numérico + «kg» a la derecha. */
-.fila-peso {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+/* Barra destacada justo sobre los resultados: título, chips rápidos
+   (toggle, estilo §6.7: activo fondo --ink / texto --paper) + campo
+   libre para otro peso, y la nota del cálculo. */
+.barra-peso {
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
 }
 
-.fila-peso__label {
+.barra-peso__titulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.barra-peso__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.chip-peso {
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--fuente-precio);
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.chip-peso:hover {
+  opacity: 0.75;
+}
+
+.chip-peso:focus-visible {
+  outline: 2px solid var(--info);
+  outline-offset: 2px;
+}
+
+.chip-peso.activo {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
 }
 
 .campo-peso {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .campo-peso input {
-  width: 96px;
+  width: 74px;
+  min-height: 44px;
+  padding: 6px 10px;
   text-align: right;
   font-family: var(--fuente-precio);
 }
 
-.campo-peso span {
+.campo-peso__unidad {
   font-family: var(--fuente-precio);
   font-size: 12.5px;
   color: var(--ink-soft);
 }
 
-/* Etiqueta «para 1,5 kg» bajo el precio calculado. */
+.barra-peso__nota {
+  margin-top: 7px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* Etiqueta bajo el precio calculado («para 1,5 kg») y aviso de fila sin
+   €/kg en modo peso («no cotiza por kg», estilo §6.4 dato incompleto). */
 .producto__peso {
   font-family: var(--fuente-precio);
   font-size: 11.5px;
   color: var(--ink-soft);
   white-space: nowrap;
+}
+
+.producto__peso--nd {
+  color: var(--warn-ink);
 }
 
 /* ------------------------- Botones ------------------------------- */

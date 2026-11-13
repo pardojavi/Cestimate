@@ -4,6 +4,7 @@ import {
   Info,
   Loader2,
   RotateCw,
+  Scale,
   ScanBarcode,
   Search,
   X,
@@ -17,6 +18,7 @@ import {
   type IdentificacionCodigo,
 } from "../lib/api";
 import {
+  PESOS_RAPIDOS,
   cotizaPorKilo,
   formatoPeso,
   parsearPesoKg,
@@ -195,43 +197,6 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
         </button>
       </form>
 
-      {/* Comparar por peso (§6.2/§6.3): solo si la respuesta tiene €/kg.
-          El peso pone el precio calculado como principal en cada fila que
-          cotice por kilo y decide la insignia «Precio más bajo». */}
-      {data && hayPorKilo && (
-        <>
-          <div className="fila-peso">
-            <label htmlFor="peso-kg" className="fila-peso__label">
-              Comparar por peso
-            </label>
-            <div className="campo-peso">
-              <input
-                id="peso-kg"
-                type="text"
-                inputMode="decimal"
-                autoComplete="off"
-                placeholder="1,5"
-                value={pesoTexto}
-                onChange={(e) => setPesoTexto(e.target.value)}
-                aria-describedby="peso-ayuda"
-              />
-              <span aria-hidden="true">kg</span>
-            </div>
-          </div>
-          <p className="nota-seccion" id="peso-ayuda">
-            {pesoActivo !== null
-              ? `Precio calculado con el €/kg de cada tienda${
-                  sinPorKilo > 0
-                    ? `; ${sinPorKilo} sin €/kg se muestra${
-                        sinPorKilo === 1 ? "" : "n"
-                      } a su precio real`
-                    : ""
-                }.`
-              : "Escribe un peso en kg para comparar todos los productos al mismo kilaje."}
-          </p>
-        </>
-      )}
-
       {mostrarEscaneador && (
         <Suspense
           fallback={
@@ -334,6 +299,69 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
         Precios de la web de cada tienda para tu código postal. Cada uno lleva
         su enlace y la hora de consulta.
       </p>
+
+      {/* Barra de peso (§6.2/§6.5): visible justo sobre los resultados y
+          solo si la respuesta tiene €/kg. Chips rápidos (toggle) + campo
+          libre: el peso pone el precio calculado como principal en cada
+          fila que cotice por kilo, decide la insignia «Precio más bajo» y
+          marca las filas que no cotizan por kg. */}
+      {data && hayPorKilo && (
+        <div className="barra-peso">
+          <span className="barra-peso__titulo" id="peso-titulo">
+            <Scale size={15} aria-hidden /> Comparar por peso
+          </span>
+          <div
+            className="barra-peso__chips"
+            role="group"
+            aria-labelledby="peso-titulo"
+          >
+            {PESOS_RAPIDOS.map((v) => {
+              const activo =
+                pesoActivo !== null && Math.abs(pesoActivo - v) < 1e-9;
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  className={activo ? "chip-peso activo" : "chip-peso"}
+                  aria-pressed={activo}
+                  onClick={() => setPesoTexto(activo ? "" : formatoPeso(v))}
+                >
+                  {formatoPeso(v)} kg
+                </button>
+              );
+            })}
+            <span className="campo-peso">
+              <label htmlFor="peso-kg" className="visually-hidden">
+                Otro peso en kilos
+              </label>
+              <input
+                id="peso-kg"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                placeholder="otro"
+                value={pesoTexto}
+                onChange={(e) => setPesoTexto(e.target.value)}
+                aria-describedby="peso-ayuda"
+              />
+              <span className="campo-peso__unidad" aria-hidden="true">
+                kg
+              </span>
+            </span>
+          </div>
+          <p id="peso-ayuda" className="barra-peso__nota">
+            {pesoActivo !== null
+              ? `Precios calculados con el €/kg de cada tienda${
+                  sinPorKilo > 0
+                    ? `; ${sinPorKilo} sin €/kg ${
+                        sinPorKilo === 1 ? "se muestra" : "se muestran"
+                      } a su precio real`
+                    : ""
+                }.`
+              : "Elige un peso para comparar todas las tiendas al mismo kilaje."}
+          </p>
+        </div>
+      )}
 
       {/* Región viva permanente: anuncia el estado de la consulta aunque
           el contenido visual cambie (los esqueletos son decorativos), y el

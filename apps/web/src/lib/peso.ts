@@ -50,3 +50,6 @@ export function precioPorPeso(
 export function formatoPeso(kg: number): string {
   return kg.toLocaleString("es-ES");
 }
+
+/** Pesos rápidos de los chips «Comparar por peso» (kg). */
+export const PESOS_RAPIDOS = [0.5, 1, 1.5, 2] as const;
