@@ -14,6 +14,7 @@ import {
   useGuardada,
   useGuardadas,
 } from "../lib/api";
+import { formatoPeso } from "../lib/peso";
 
 /**
  * Historial (ESTILOS.md §8): tarjeta «Guardar la cesta actual» con fecha
@@ -235,7 +236,10 @@ function Detalle({ id, volver }: { id: number; volver: () => void }) {
           <h3>
             {grupo.lineas[0]?.genericName}{" "}
             <span className="badge cantidad">
-              ×{grupo.qtyUnit === "kg" ? `${grupo.qty} kg` : grupo.qty}
+              ×
+              {grupo.qtyUnit === "kg"
+                ? `${formatoPeso(grupo.qty)} kg`
+                : formatoPeso(grupo.qty)}
             </span>
           </h3>
           <ul className="lista-sin-margen">
