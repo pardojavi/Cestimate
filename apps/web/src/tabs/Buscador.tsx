@@ -145,8 +145,17 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
   }
 
   function anadirComparacion() {
+    // Con peso puesto en Buscar, el artículo nace en modo kg con ese kilaje
+    // (solo si todos los marcados cotizan por kg; si no, queda en unidades).
+    const porPeso =
+      pesoActivo !== null &&
+      listaMarcados.length > 0 &&
+      listaMarcados.every(cotizaPorKilo);
     anadir.mutate(
-      { productos: listaMarcados },
+      {
+        productos: listaMarcados,
+        ...(porPeso ? { qty: pesoActivo!, qtyUnit: "kg" as const } : {}),
+      },
       {
         onSuccess: () => {
           setMarcados({});
@@ -455,7 +464,15 @@ export default function Buscador({ irA }: { irA?: (v: "cesta") => void }) {
               resultado={r}
               destacadoId={masBarato?.externalId}
               destacadoStore={masBarato?.storeId}
-              onAnadir={(p) => anadir.mutate({ productos: [p] })}
+              onAnadir={(p) =>
+                anadir.mutate({
+                  productos: [p],
+                  // Con peso activo, el artículo nace en modo kg con ese kilaje.
+                  ...(pesoActivo !== null && cotizaPorKilo(p)
+                    ? { qty: pesoActivo, qtyUnit: "kg" as const }
+                    : {}),
+                })
+              }
               anadiendo={anadir.isPending}
               marcados={marcados}
               onToggle={alternar}

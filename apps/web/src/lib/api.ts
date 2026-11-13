@@ -10,6 +10,7 @@ import type {
   Settings,
   Store,
   StoreProduct,
+  UnidadCantidad,
 } from "@cestimate/shared";
 
 /* ------------------------------------------------------------------ */
@@ -66,6 +67,8 @@ export interface ItemCesta {
   id: number;
   genericName: string;
   qty: number;
+  /** «kg» = la cantidad es un peso (€/kg × kg); «ud» = unidades. */
+  qtyUnit: UnidadCantidad;
   matches: Record<
     string,
     {
@@ -98,11 +101,13 @@ export interface DetalleGuardada extends Omit<CestaGuardada, "totals"> {
     id: number;
     genericName: string;
     qty: number;
+    qtyUnit: UnidadCantidad;
     storeId: string;
     storeName: string;
     productName: string | null;
     priceAtSave: number | null;
     unitPriceAtSave: number | null;
+    unitPriceNow: number | null;
     unit: string | null;
     url: string | null;
     priceNow: number | null;
@@ -242,8 +247,19 @@ export function useAnadirArticulo() {
      * por tienda): todos se emparejan de golpe y el artículo queda listo
      * para comparar. Si un producto no tiene `localId` se crea el artículo
      * sin ese emparejamiento (se podrá elegir luego desde la Cesta).
+     *
+     * `qty`/`qtyUnit` llegan desde Buscar cuando hay peso puesto: el
+     * artículo nace en modo kg y la cuesta cobra €/kg × kg.
      */
-    mutationFn: async ({ productos }: { productos: StoreProduct[] }) => {
+    mutationFn: async ({
+      productos,
+      qty,
+      qtyUnit,
+    }: {
+      productos: StoreProduct[];
+      qty?: number;
+      qtyUnit?: UnidadCantidad;
+    }) => {
       if (productos.length === 0)
         throw new ErrorApi("No has seleccionado ningún producto.");
       // Un solo producto por tienda: si se repite, gana el último.
@@ -253,7 +269,8 @@ export function useAnadirArticulo() {
         method: "POST",
         body: JSON.stringify({
           genericName: productos[0]!.name,
-          qty: 1,
+          qty: qty ?? 1,
+          qtyUnit: qtyUnit ?? "ud",
           matches: [...porTienda.values()].map((p) => ({
             storeId: p.storeId,
             productId: p.localId!,
@@ -276,6 +293,7 @@ export function useActualizarArticulo() {
       id: number;
       genericName?: string;
       qty?: number;
+      qtyUnit?: UnidadCantidad;
     }) =>
       pedir(`/api/basket/items/${id}`, {
         method: "PATCH",

@@ -7,12 +7,20 @@ import { abrirDB, type DB } from "../lib/db.js";
  * evolución del precio de productos y estadísticas de ahorro.
  */
 
+/**
+ * Precio de una línea de cesta guardada, con la misma regla que
+ * `precioPorCantidad` (shared): en modo kg manda el €/kg guardado y, si
+ * el producto no cotiza por kg, manda el precio real de la pieza/pack.
+ */
+const PRECIO_LINEA = `CASE WHEN l.qty_unit = 'kg' AND l.unit = 'kg' AND l.unit_price_at_save IS NOT NULL
+       THEN l.unit_price_at_save ELSE l.price_at_save END`;
+
 function seriesTotales(base: DB) {
   // Total de cada cesta guardada, por tienda (a partir de los precios guardados).
   const filas = base
     .prepare(
       `SELECT l.saved_basket_id, b.date, l.store_id, l.store_name,
-              SUM(l.price_at_save * l.qty) AS total
+              SUM(ROUND(${PRECIO_LINEA} * l.qty, 2)) AS total
        FROM saved_basket_line l
        JOIN saved_basket b ON b.id = l.saved_basket_id
        WHERE l.price_at_save IS NOT NULL
@@ -97,8 +105,8 @@ function resumen(base: DB) {
   for (const c of cestas) {
     const totales = base
       .prepare(
-        `SELECT store_id, store_name, SUM(price_at_save * qty) AS total
-         FROM saved_basket_line
+        `SELECT store_id, store_name, SUM(ROUND(${PRECIO_LINEA} * qty, 2)) AS total
+         FROM saved_basket_line l
          WHERE saved_basket_id = ? AND price_at_save IS NOT NULL
          GROUP BY store_id`,
       )
@@ -115,13 +123,15 @@ function resumen(base: DB) {
   }
 
   // Artículos con mayor diferencia de precio entre tiendas (de lo guardado).
+  // `min_p`/`max_p` comparan el precio efectivo por unidad (€/kg en modo kg),
+  // igual que las celdas de la cesta.
   const diferencias = base
     .prepare(
       `SELECT generic_name,
-              MIN(price_at_save) AS min_p,
-              MAX(price_at_save) AS max_p,
+              MIN(${PRECIO_LINEA}) AS min_p,
+              MAX(${PRECIO_LINEA}) AS max_p,
               COUNT(DISTINCT store_id) AS n_tendas
-       FROM saved_basket_line
+       FROM saved_basket_line l
        WHERE price_at_save IS NOT NULL
        GROUP BY generic_name, qty
        HAVING n_tendas > 1

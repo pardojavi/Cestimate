@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import type { BasketSummary } from "@cestimate/shared";
-import { haceTiempo, formatoEUR } from "@cestimate/shared";
+import { haceTiempo, formatoEUR, precioPorCantidad } from "@cestimate/shared";
 import {
   useActualizarArticulo,
   useActualizarPrecios,
@@ -27,6 +27,7 @@ import {
   type ItemCesta,
 } from "../lib/api";
 import { colorDeTienda } from "./Buscador";
+import { formatoPeso, parsearPesoKg } from "../lib/peso";
 
 /**
  * Cesta (ESTILOS.md §8): filas de artículo con selector de cantidad,
@@ -236,8 +237,22 @@ function ArticuloCesta({
 }) {
   const [editando, setEditando] = useState(false);
   const [nombre, setNombre] = useState(item.genericName);
+  /** Texto del campo de cantidad (admite coma decimal «1,5»). */
+  const [qtyTexto, setQtyTexto] = useState(() => formatoPeso(item.qty));
   const actualizar = useActualizarArticulo();
   const eliminar = useEliminarArticulo();
+
+  const esKg = item.qtyUnit === "kg";
+  // El artículo se puede pesar si algún producto emparejado cotiza por kg.
+  const cotizaKg = Object.values(item.matches).some(
+    (m) => m.product.unit === "kg" && (m.product.unitPrice ?? 0) > 0,
+  );
+  const paso = esKg ? 0.5 : 1;
+
+  // Si la cantidad cambia fuera del campo (+/−), el texto se pone al día.
+  useEffect(() => {
+    setQtyTexto(formatoPeso(item.qty));
+  }, [item.qty]);
 
   const cubiertas = activas.filter((t) => item.matches[t.id]);
 
@@ -247,6 +262,43 @@ function ArticuloCesta({
       actualizar.mutate({ id: item.id, genericName: valor });
     }
     setEditando(false);
+  }
+
+  /** Confirma el texto escrito en el campo de cantidad (Enter o salida). */
+  function guardarCantidad() {
+    const valor = parsearPesoKg(qtyTexto); // > 0, admite «1,5» y «1.5»
+    if (valor === null) {
+      setQtyTexto(formatoPeso(item.qty)); // texto inválido: se recupera
+      return;
+    }
+    // En modo kg es un peso con decimales; en modo ud, piezas enteras.
+    const qty = esKg
+      ? Math.round(valor * 1000) / 1000
+      : Math.max(1, Math.round(valor));
+    if (qty !== item.qty) actualizar.mutate({ id: item.id, qty });
+    else setQtyTexto(formatoPeso(qty));
+  }
+
+  function cambiarCantidad(delta: number) {
+    const min = esKg ? 0.1 : 1;
+    const siguiente = Math.max(min, Math.round((item.qty + delta) * 100) / 100);
+    if (siguiente !== item.qty)
+      actualizar.mutate({ id: item.id, qty: siguiente });
+    setQtyTexto(formatoPeso(siguiente));
+  }
+
+  /** Alterna el artículo entre unidades (ud) y peso (kg). */
+  function cambiarUnidad() {
+    if (esKg) {
+      // De kg a ud: la cantidad pasa a piezas enteras (1,5 kg → 1 ud).
+      actualizar.mutate({
+        id: item.id,
+        qtyUnit: "ud",
+        qty: Math.max(1, Math.round(item.qty)),
+      });
+    } else {
+      actualizar.mutate({ id: item.id, qtyUnit: "kg" });
+    }
   }
 
   return (
@@ -292,19 +344,39 @@ function ArticuloCesta({
 
         <div className="cantidad">
           <button
-            onClick={() =>
-              actualizar.mutate({ id: item.id, qty: Math.max(1, item.qty - 1) })
-            }
-            aria-label="Quitar una unidad"
+            onClick={() => cambiarCantidad(-paso)}
+            aria-label={esKg ? "Quitar medio kilo" : "Quitar una unidad"}
           >
             <Minus size={16} aria-hidden />
           </button>
-          <span aria-label={`Cantidad ${item.qty}`}>{item.qty}</span>
+          <input
+            value={qtyTexto}
+            inputMode="decimal"
+            autoComplete="off"
+            onChange={(e) => setQtyTexto(e.target.value)}
+            onBlur={guardarCantidad}
+            onKeyDown={(e) => e.key === "Enter" && guardarCantidad()}
+            aria-label={esKg ? "Cantidad en kilos" : "Cantidad"}
+          />
+          {/* Unidad visible y conmutable: «kg» cuando el artículo pesa. */}
+          {(esKg || cotizaKg) && (
+            <button
+              type="button"
+              className={esKg ? "cantidad__unidad activa" : "cantidad__unidad"}
+              aria-pressed={esKg}
+              aria-label={
+                esKg
+                  ? "La cantidad está en kilos: cambiar a unidades"
+                  : "La cantidad está en unidades: cambiar a kilos"
+              }
+              onClick={cambiarUnidad}
+            >
+              {esKg ? "kg" : "ud"}
+            </button>
+          )}
           <button
-            onClick={() =>
-              actualizar.mutate({ id: item.id, qty: item.qty + 1 })
-            }
-            aria-label="Añadir una unidad"
+            onClick={() => cambiarCantidad(paso)}
+            aria-label={esKg ? "Añadir medio kilo" : "Añadir una unidad"}
           >
             <Plus size={16} aria-hidden />
           </button>
@@ -370,6 +442,10 @@ function SelectorTienda({
 
   if (match) {
     const p = match.product;
+    // Misma regla que el backend: en modo kg cobra el €/kg real × kg.
+    const total = precioPorCantidad(p, item.qty, item.qtyUnit);
+    const porPeso =
+      item.qtyUnit === "kg" && p.unit === "kg" && (p.unitPrice ?? 0) > 0;
     return (
       <div className="resumen-item">
         <div className="cab">
@@ -386,8 +462,13 @@ function SelectorTienda({
             href={p.url}
             target="_blank"
             rel="noopener noreferrer"
+            title={
+              porPeso && p.unitPrice
+                ? `Calculado: ${formatoEUR(p.unitPrice)}/kg × ${formatoPeso(item.qty)} kg`
+                : undefined
+            }
           >
-            {formatoEUR(p.price * item.qty)}
+            {formatoEUR(total)}
           </a>
           <button
             className="btn neutro mini"
@@ -401,6 +482,12 @@ function SelectorTienda({
         </div>
         <div className="producto__meta">
           {p.format ? `${p.format} · ` : ""}
+          {/* €/kg real de la tienda: en modo kg es el cálculo del total. */}
+          {p.unitPrice !== null && p.unitPrice > 0 && p.unit
+            ? porPeso
+              ? `${formatoEUR(p.unitPrice)}/${p.unit} × ${formatoPeso(item.qty)} kg · `
+              : `${formatoEUR(p.unitPrice)}/${p.unit} · `
+            : ""}
           consultado {haceTiempo(p.fetchedAt)}
         </div>
       </div>
@@ -530,7 +617,12 @@ function Detalle({ resumen }: { resumen: BasketSummary | undefined }) {
               <tr key={fila.basketItemId}>
                 <td>
                   {fila.genericName}{" "}
-                  <span className="badge cantidad">×{fila.qty}</span>
+                  <span className="badge cantidad">
+                    ×
+                    {fila.qtyUnit === "kg"
+                      ? `${formatoPeso(fila.qty)} kg`
+                      : formatoPeso(fila.qty)}
+                  </span>
                 </td>
                 {fila.cells.map((c) => (
                   <td

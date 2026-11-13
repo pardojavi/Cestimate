@@ -84,10 +84,15 @@ export interface Store {
   createdAt: string;
 }
 
+/** Modo de la cantidad de un artículo de cesta: unidades sueltas o peso. */
+export type UnidadCantidad = "ud" | "kg";
+
 export interface BasketItem {
   id: number;
   genericName: string;
   qty: number;
+  /** En «kg» la cantidad es un peso (la celda cobra €/kg × kg). */
+  qtyUnit: UnidadCantidad;
   matches: Record<string, BasketMatch>;
 }
 
@@ -125,6 +130,7 @@ export interface BasketSummary {
     basketItemId: number;
     genericName: string;
     qty: number;
+    qtyUnit: UnidadCantidad;
     cells: {
       storeId: string;
       price: number | null;
@@ -395,6 +401,31 @@ export function formatoEUR(valor: number): string {
     style: "currency",
     currency: "EUR",
   }).format(valor);
+}
+
+/**
+ * Lo que cuesta la cantidad de un artículo en la cesta, redondeado a
+ * céntimos. Es la única fuente del cálculo (API y web lo usan igual):
+ *
+ * • `qtyUnit === "kg"` (artículo por peso): cobra el **€/kg real** de la
+ *   tienda (€/kg × kg). Si ese producto no cotiza por kg, se queda en su
+ *   precio real por unidad: nunca se inventa un precio (AGENT.md §4.3).
+ * • `qtyUnit === "ud"`: precio real de la pieza/pack × unidades.
+ */
+export function precioPorCantidad(
+  producto: { price: number; unitPrice: number | null; unit: string | null },
+  cantidad: number,
+  qtyUnit: UnidadCantidad = "ud",
+): number {
+  if (
+    qtyUnit === "kg" &&
+    producto.unit === "kg" &&
+    producto.unitPrice !== null &&
+    producto.unitPrice > 0
+  ) {
+    return Math.round(producto.unitPrice * cantidad * 100) / 100;
+  }
+  return Math.round(producto.price * cantidad * 100) / 100;
 }
 
 /** Normaliza un valor guardado (SQLite `YYYY-MM-DD HH:MM:SS` o ISO) a ISO-8601 con Z. */

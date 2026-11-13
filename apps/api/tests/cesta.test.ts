@@ -1,10 +1,12 @@
 import { beforeAll, describe, expect, it } from "vitest";
+import { precioPorCantidad } from "@cestimate/shared";
 import { abrirDB, guardarProducto } from "../src/lib/db.js";
 import { calcularResumen, crearArticulo } from "../src/routes/basket.js";
 
 /**
  * Tests del resumen de la cesta (§3.3, §9): totales, mínimo por fila,
- * faltantes y ahorro.
+ * faltantes y ahorro. Incluye el modo «kg» (artículos por peso: la celda
+ * cobra €/kg × kg, no el precio de la pieza).
  */
 
 let db: ReturnType<typeof abrirDB>;
@@ -200,5 +202,143 @@ describe("crearArticulo", () => {
       .prepare("SELECT COUNT(*) n FROM basket_item_match")
       .get() as { n: number };
     expect(huerfanos.n).toBe(0);
+  });
+
+  it("recuerda el modo de la cantidad (ud o kg)", () => {
+    db.exec("DELETE FROM basket_item_match; DELETE FROM basket_item;");
+
+    const id = crearArticulo(db, {
+      genericName: "Banana",
+      qty: 1,
+      qtyUnit: "kg",
+    });
+    const kg = db
+      .prepare("SELECT qty_unit FROM basket_item WHERE id = ?")
+      .get(id) as { qty_unit: string };
+    expect(kg.qty_unit).toBe("kg");
+
+    // Sin qtyUnit sigue naciendo en unidades (compatibilidad hacia atrás).
+    const ud = crearArticulo(db, { genericName: "Leche", qty: 2 });
+    const filaUd = db
+      .prepare("SELECT qty_unit FROM basket_item WHERE id = ?")
+      .get(ud) as { qty_unit: string };
+    expect(filaUd.qty_unit).toBe("ud");
+  });
+});
+
+describe("precioPorCantidad", () => {
+  it("en modo kg cobra el €/kg real × kg, redondeado a céntimos", () => {
+    // Banana Mercadona: 0,28 € la pieza, 1,55 €/kg → 1 kg = 1,55 €.
+    const banana = { price: 0.28, unitPrice: 1.55, unit: "kg" };
+    expect(precioPorCantidad(banana, 1, "kg")).toBe(1.55);
+    // 1,55 × 1,5 = 2,325 → 2,33 €.
+    expect(precioPorCantidad(banana, 1.5, "kg")).toBe(2.33);
+    expect(
+      precioPorCantidad(
+        { price: 2.99, unitPrice: 29.9, unit: "kg" },
+        0.5,
+        "kg",
+      ),
+    ).toBe(14.95);
+  });
+
+  it("en modo ud multiplica el precio real de la pieza/pack", () => {
+    expect(
+      precioPorCantidad({ price: 0.28, unitPrice: 1.55, unit: "kg" }, 3, "ud"),
+    ).toBe(0.84);
+    // Por defecto es unidades: no cambia el comportamiento antiguo.
+    expect(
+      precioPorCantidad({ price: 0.96, unitPrice: null, unit: null }, 2),
+    ).toBe(1.92);
+  });
+
+  it("si el producto no cotiza por kg, en modo kg manda su precio real", () => {
+    // Sin €/kg (p. ej. mascarilla): nunca se inventa un precio (§4.3).
+    expect(
+      precioPorCantidad({ price: 6.35, unitPrice: null, unit: null }, 2, "kg"),
+    ).toBe(12.7);
+    // Cotiza en litros: el modo kg no aplica.
+    expect(
+      precioPorCantidad({ price: 1.2, unitPrice: 1.15, unit: "L" }, 2, "kg"),
+    ).toBe(2.4);
+  });
+});
+
+describe("cesta por kilo", () => {
+  it("cobra €/kg × kg en celdas y totales, y respeta el cambio de peso", () => {
+    db.exec(
+      "DELETE FROM basket_item_match; DELETE FROM basket_item; DELETE FROM price_snapshot; DELETE FROM product;",
+    );
+
+    // Datos reales de banana: ambas tiendas a 1,55 €/kg con piezas distintas.
+    const bananaM = guardarProducto(db, {
+      storeId: "mercadona",
+      externalId: "banana-m",
+      name: "Banana",
+      url: "https://tienda.mercadona.es/product/banana",
+      price: 0.28,
+      unitPrice: 1.55,
+      unit: "kg",
+    });
+    const bananaC = guardarProducto(db, {
+      storeId: "consum",
+      externalId: "banana-c",
+      name: "Banana",
+      url: "https://tienda.consum.es/product/banana",
+      price: 0.31,
+      unitPrice: 1.55,
+      unit: "kg",
+    });
+
+    const id = crearArticulo(db, {
+      genericName: "Banana",
+      qty: 1,
+      qtyUnit: "kg",
+      matches: [
+        { storeId: "mercadona", productId: bananaM },
+        { storeId: "consum", productId: bananaC },
+      ],
+    });
+
+    // 1 kg → 1,55 € por tienda (no el precio de la pieza: 0,28 / 0,31).
+    const resumen = calcularResumen(db, false);
+    expect(resumen.stores.find((s) => s.storeId === "mercadona")!.total).toBe(
+      1.55,
+    );
+    expect(resumen.stores.find((s) => s.storeId === "consum")!.total).toBe(
+      1.55,
+    );
+    const fila = resumen.rows.find((r) => r.basketItemId === id)!;
+    expect(fila.qtyUnit).toBe("kg");
+    expect(fila.cells.every((c) => c.price === 1.55)).toBe(true);
+
+    // Cambiar el peso en la cesta a 1,5 kg → 2,33 € (1,55 × 1,5 = 2,325).
+    db.prepare("UPDATE basket_item SET qty = 1.5 WHERE id = ?").run(id);
+    const conPeso = calcularResumen(db, false);
+    expect(conPeso.stores.find((s) => s.storeId === "mercadona")!.total).toBe(
+      2.33,
+    );
+    expect(conPeso.stores.find((s) => s.storeId === "consum")!.total).toBe(
+      2.33,
+    );
+    expect(conPeso.saving).toBe(0);
+
+    // Un artículo en modo ud con el mismo producto sigue cobrando la pieza.
+    const porPieza = crearArticulo(db, {
+      genericName: "Banana por pieza",
+      qty: 2,
+      qtyUnit: "ud",
+      matches: [{ storeId: "mercadona", productId: bananaM }],
+    });
+    const mixto = calcularResumen(db, false);
+    const filaPieza = mixto.rows.find((r) => r.basketItemId === porPieza)!;
+    expect(filaPieza.qtyUnit).toBe("ud");
+    expect(filaPieza.cells.find((c) => c.storeId === "mercadona")!.price).toBe(
+      0.56,
+    );
+    expect(mixto.stores.find((s) => s.storeId === "mercadona")!.total).toBe(
+      2.89,
+    );
+    expect(mixto.stores.find((s) => s.storeId === "consum")!.total).toBe(2.33);
   });
 });

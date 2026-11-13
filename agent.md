@@ -92,10 +92,11 @@ Si algo del stack no encaja, proponer alternativa antes de implementar y justifi
 - Un **artículo de cesta** es un concepto genérico ("Leche entera 1L") con cantidad y, por cada tienda, un producto concreto elegido (o ninguno).
 - Para cada tienda el usuario elige qué producto de esa tienda representa el artículo. Se puede sugerir automáticamente el mejor candidato (mismo formato, precio unitario comparable), siempre editable.
 - Cantidades editables.
+- **Artículos por peso** (fruta, carne, pescado): al añadir desde Buscar con un kilaje puesto, el artículo nace en **modo kg** —la cantidad es un peso con decimales— y la celda cobra **€/kg real × kg** (nunca el precio de la pieza). La cesta muestra el €/kg con el que se calcula y permite cambiar el peso o volver a unidades.
 
 ### 3.3 Resumen de la cesta
 
-- Tabla: filas = artículos, columnas = tiendas, celda = precio × cantidad.
+- Tabla: filas = artículos, columnas = tiendas, celda = precio × cantidad (o **€/kg × kg** si el artículo está en modo kilo; la única fuente del cálculo es `precioPorCantidad` de `@cestimate/shared`).
 - Marcar la celda más barata por fila y el total más barato.
 - Totales por tienda; si a una tienda le faltan artículos, indicarlo y **no declararla ganadora** salvo que se pida comparar solo los artículos comunes.
 - Mostrar el ahorro frente a la tienda más cara.

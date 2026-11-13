@@ -1,6 +1,10 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { aISO } from "@cestimate/shared";
+import {
+  aISO,
+  precioPorCantidad,
+  type UnidadCantidad,
+} from "@cestimate/shared";
 import { abrirDB, type DB } from "../lib/db.js";
 
 /**
@@ -17,6 +21,7 @@ interface LineaConActual {
   id: number;
   generic_name: string;
   qty: number;
+  qty_unit: string | null;
   store_id: string;
   store_name: string;
   product_name: string | null;
@@ -26,6 +31,8 @@ interface LineaConActual {
   url: string | null;
   product_id: number | null;
   price_now: number | null;
+  /** €/kg o €/L actuales: para que el artículo por peso muestre lo mismo hoy. */
+  unit_price_now: number | null;
   fetched_now: string | null;
 }
 
@@ -37,6 +44,11 @@ function leerLineas(base: DB, basketId: number): LineaConActual[] {
          WHERE ps.product_id = l.product_id
          ORDER BY ps.fetched_at DESC LIMIT 1
        ) AS price_now,
+       (
+         SELECT unit_price FROM price_snapshot ps
+         WHERE ps.product_id = l.product_id
+         ORDER BY ps.fetched_at DESC LIMIT 1
+       ) AS unit_price_now,
        (
          SELECT fetched_at FROM price_snapshot ps
          WHERE ps.product_id = l.product_id
@@ -54,7 +66,16 @@ function totalesPorTienda(lineas: LineaConActual[]) {
   for (const l of lineas) {
     if (l.price_at_save === null) continue;
     const actual = mapa.get(l.store_id) ?? { name: l.store_name, total: 0 };
-    actual.total += l.price_at_save * l.qty;
+    // Misma regla que la cesta activa: en modo kg manda el €/kg guardado.
+    actual.total += precioPorCantidad(
+      {
+        price: l.price_at_save,
+        unitPrice: l.unit_price_at_save,
+        unit: l.unit,
+      },
+      l.qty,
+      (l.qty_unit ?? "ud") === "kg" ? "kg" : "ud",
+    );
     mapa.set(l.store_id, actual);
   }
   return [...mapa.entries()].map(([storeId, v]) => ({
@@ -94,7 +115,7 @@ export function registrarGuardadas(app: FastifyInstance): void {
     const base = abrirDB();
     const items = base
       .prepare(
-        `SELECT bi.generic_name, bi.qty, m.store_id, m.product_id,
+        `SELECT bi.generic_name, bi.qty, bi.qty_unit, m.store_id, m.product_id,
                 p.name AS product_name, p.url,
                 (SELECT price FROM price_snapshot ps WHERE ps.product_id = m.product_id
                  ORDER BY ps.fetched_at DESC LIMIT 1) AS price,
@@ -110,6 +131,7 @@ export function registrarGuardadas(app: FastifyInstance): void {
       .all() as {
       generic_name: string;
       qty: number;
+      qty_unit: string | null;
       store_id: string;
       product_id: number;
       product_name: string;
@@ -120,11 +142,9 @@ export function registrarGuardadas(app: FastifyInstance): void {
     }[];
 
     if (items.length === 0) {
-      return reply
-        .code(400)
-        .send({
-          error: "La cesta está vacía o no tiene productos emparejados.",
-        });
+      return reply.code(400).send({
+        error: "La cesta está vacía o no tiene productos emparejados.",
+      });
     }
 
     const guardar = base.transaction(() => {
@@ -134,15 +154,16 @@ export function registrarGuardadas(app: FastifyInstance): void {
       const id = Number(resultado.lastInsertRowid);
       const stmt = base.prepare(
         `INSERT INTO saved_basket_line
-           (saved_basket_id, generic_name, qty, store_id, store_name, product_name,
+           (saved_basket_id, generic_name, qty, qty_unit, store_id, store_name, product_name,
             price_at_save, unit_price_at_save, unit, url, product_id)
-         VALUES (?, ?, ?, ?, (SELECT name FROM store WHERE id = ?), ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, (SELECT name FROM store WHERE id = ?), ?, ?, ?, ?, ?, ?)`,
       );
       for (const l of items) {
         stmt.run(
           id,
           l.generic_name,
           l.qty,
+          l.qty_unit === "kg" ? "kg" : "ud",
           l.store_id,
           l.store_id,
           l.product_name,
@@ -179,11 +200,15 @@ export function registrarGuardadas(app: FastifyInstance): void {
           id: l.id,
           genericName: l.generic_name,
           qty: l.qty,
+          qtyUnit: ((l.qty_unit ?? "ud") === "kg"
+            ? "kg"
+            : "ud") as UnidadCantidad,
           storeId: l.store_id,
           storeName: l.store_name,
           productName: l.product_name,
           priceAtSave: l.price_at_save,
           unitPriceAtSave: l.unit_price_at_save,
+          unitPriceNow: l.unit_price_now,
           unit: l.unit,
           url: l.url,
           priceNow: l.price_now,
@@ -219,7 +244,7 @@ export function registrarGuardadas(app: FastifyInstance): void {
       const cargar = base.transaction(() => {
         base.prepare("DELETE FROM basket_item").run();
         const nuevoItem = base.prepare(
-          "INSERT INTO basket_item (generic_name, qty) VALUES (?, ?)",
+          "INSERT INTO basket_item (generic_name, qty, qty_unit) VALUES (?, ?, ?)",
         );
         const nuevoMatch = base.prepare(
           `INSERT INTO basket_item_match (basket_item_id, store_id, product_id)
@@ -231,7 +256,11 @@ export function registrarGuardadas(app: FastifyInstance): void {
           let itemId = porNombre.get(l.generic_name);
           if (!itemId) {
             itemId = Number(
-              nuevoItem.run(l.generic_name, l.qty).lastInsertRowid,
+              nuevoItem.run(
+                l.generic_name,
+                l.qty,
+                l.qty_unit === "kg" ? "kg" : "ud",
+              ).lastInsertRowid,
             );
             porNombre.set(l.generic_name, itemId);
           }

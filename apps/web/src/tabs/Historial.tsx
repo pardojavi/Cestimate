@@ -5,6 +5,7 @@ import {
   formatoDia,
   formatoEUR,
   normalizar,
+  precioPorCantidad,
 } from "@cestimate/shared";
 import {
   useCargarCesta,
@@ -206,13 +207,13 @@ function Detalle({ id, volver }: { id: number; volver: () => void }) {
   // Agrupa las líneas por artículo para comparar tiendas.
   const porArticulo = new Map<
     string,
-    { qty: number; lineas: typeof cesta.lines }
+    { qty: number; qtyUnit: "ud" | "kg"; lineas: typeof cesta.lines }
   >();
   for (const l of cesta.lines) {
     const clave = normalizar(l.genericName);
     let entrada = porArticulo.get(clave);
     if (!entrada) {
-      entrada = { qty: l.qty, lineas: [] };
+      entrada = { qty: l.qty, qtyUnit: l.qtyUnit, lineas: [] };
       porArticulo.set(clave, entrada);
     }
     entrada.lineas.push(l);
@@ -233,7 +234,9 @@ function Detalle({ id, volver }: { id: number; volver: () => void }) {
         <div key={i} className="tarjeta">
           <h3>
             {grupo.lineas[0]?.genericName}{" "}
-            <span className="badge cantidad">×{grupo.qty}</span>
+            <span className="badge cantidad">
+              ×{grupo.qtyUnit === "kg" ? `${grupo.qty} kg` : grupo.qty}
+            </span>
           </h3>
           <ul className="lista-sin-margen">
             {grupo.lineas.map((l) => (
@@ -257,13 +260,39 @@ function Detalle({ id, volver }: { id: number; volver: () => void }) {
                 <div className="producto__acciones">
                   <span className="precio">
                     {l.priceAtSave !== null
-                      ? formatoEUR(l.priceAtSave * l.qty)
+                      ? formatoEUR(
+                          precioPorCantidad(
+                            {
+                              price: l.priceAtSave,
+                              unitPrice: l.unitPriceAtSave,
+                              unit: l.unit,
+                            },
+                            l.qty,
+                            l.qtyUnit,
+                          ),
+                        )
                       : "n/d"}
                   </span>
                   {l.priceNow !== null && l.priceAtSave !== null && (
                     <Diferencia
-                      antes={l.priceAtSave * l.qty}
-                      ahora={l.priceNow * l.qty}
+                      antes={precioPorCantidad(
+                        {
+                          price: l.priceAtSave,
+                          unitPrice: l.unitPriceAtSave,
+                          unit: l.unit,
+                        },
+                        l.qty,
+                        l.qtyUnit,
+                      )}
+                      ahora={precioPorCantidad(
+                        {
+                          price: l.priceNow,
+                          unitPrice: l.unitPriceNow,
+                          unit: l.unit,
+                        },
+                        l.qty,
+                        l.qtyUnit,
+                      )}
                     />
                   )}
                 </div>

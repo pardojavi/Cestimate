@@ -1,6 +1,11 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { aISO, type BasketSummary } from "@cestimate/shared";
+import {
+  aISO,
+  precioPorCantidad,
+  type BasketSummary,
+  type UnidadCantidad,
+} from "@cestimate/shared";
 import { registrarAdaptadores } from "../adapters/index.js";
 import { abrirDB, obtenerAjustes, type DB } from "../lib/db.js";
 
@@ -13,6 +18,9 @@ const adaptadores = registrarAdaptadores(abrirDB());
 const zItem = z.object({
   genericName: z.string().min(1).max(200),
   qty: z.number().positive().max(999).default(1),
+  // «kg» cuando el artículo nace por peso (desde Buscar con el kilaje
+  // puesto): la cesta cobra €/kg × kg en lugar del precio de la pieza.
+  qtyUnit: z.enum(["ud", "kg"]).default("ud"),
   // Emparejamientos iniciales: permite crear un artículo ya comparado
   // desde la pestaña Buscar (un producto por tienda).
   matches: z
@@ -36,6 +44,7 @@ export function crearArticulo(
   datos: {
     genericName: string;
     qty: number;
+    qtyUnit?: UnidadCantidad;
     matches?: { storeId: string; productId: number }[];
   },
 ): number {
@@ -55,8 +64,10 @@ export function crearArticulo(
   }
   return base.transaction(() => {
     const resultado = base
-      .prepare("INSERT INTO basket_item (generic_name, qty) VALUES (?, ?)")
-      .run(datos.genericName, datos.qty);
+      .prepare(
+        "INSERT INTO basket_item (generic_name, qty, qty_unit) VALUES (?, ?, ?)",
+      )
+      .run(datos.genericName, datos.qty, datos.qtyUnit ?? "ud");
     const itemId = Number(resultado.lastInsertRowid);
     const emparejar = base.prepare(
       `INSERT INTO basket_item_match (basket_item_id, store_id, product_id) VALUES (?, ?, ?)
@@ -70,12 +81,14 @@ export function crearArticulo(
 const zEdicionItem = z.object({
   genericName: z.string().min(1).max(200).optional(),
   qty: z.number().positive().max(999).optional(),
+  qtyUnit: z.enum(["ud", "kg"]).optional(),
 });
 
 interface ItemConMatch {
   id: number;
   generic_name: string;
   qty: number;
+  qty_unit: string | null;
   store_id: string | null;
   product_id: number | null;
   product_name: string | null;
@@ -91,7 +104,7 @@ interface ItemConMatch {
 function leerItems(base: DB): ItemConMatch[] {
   return base
     .prepare(
-      `SELECT bi.id, bi.generic_name, bi.qty,
+      `SELECT bi.id, bi.generic_name, bi.qty, bi.qty_unit,
               m.store_id, m.product_id,
               p.name AS product_name, p.format, p.url, p.image_url,
               s.price, s.unit_price, s.unit, s.fetched_at
@@ -116,6 +129,7 @@ function construirBasket(base: DB) {
       id: number;
       genericName: string;
       qty: number;
+      qtyUnit: UnidadCantidad;
       matches: Record<
         string,
         {
@@ -139,7 +153,13 @@ function construirBasket(base: DB) {
   for (const f of filas) {
     let item = porId.get(f.id);
     if (!item) {
-      item = { id: f.id, genericName: f.generic_name, qty: f.qty, matches: {} };
+      item = {
+        id: f.id,
+        genericName: f.generic_name,
+        qty: f.qty,
+        qtyUnit: f.qty_unit === "kg" ? "kg" : "ud",
+        matches: {},
+      };
       porId.set(f.id, item);
     }
     if (f.store_id && f.product_id && f.price !== null) {
@@ -199,7 +219,9 @@ export function calcularResumen(base: DB, soloComunes: boolean): BasketSummary {
         const incluido = soloComunes
           ? itemsComparables.some((i) => i.id === item.id)
           : true;
-        if (incluido) total += match.product.price * item.qty;
+        // Artículo en modo kg → €/kg real × kg; si no, precio × uds.
+        if (incluido)
+          total += precioPorCantidad(match.product, item.qty, item.qtyUnit);
       } else {
         if (!soloComunes) missing++;
         else if (itemsComparables.some((i) => i.id === item.id)) missing++;
@@ -229,9 +251,12 @@ export function calcularResumen(base: DB, soloComunes: boolean): BasketSummary {
     basketItemId: item.id,
     genericName: item.genericName,
     qty: item.qty,
+    qtyUnit: item.qtyUnit,
     cells: tiendas.map((t) => {
       const match = item.matches[t.id];
-      const precio = match ? match.product.price * item.qty : null;
+      const precio = match
+        ? precioPorCantidad(match.product, item.qty, item.qtyUnit)
+        : null;
       return { storeId: t.id, price: precio, cheapest: false };
     }),
   }));
@@ -286,9 +311,14 @@ export function registrarCesta(app: FastifyInstance): void {
       const d = parseado.data;
       const resultado = base
         .prepare(
-          "UPDATE basket_item SET generic_name = COALESCE(?, generic_name), qty = COALESCE(?, qty) WHERE id = ?",
+          "UPDATE basket_item SET generic_name = COALESCE(?, generic_name), qty = COALESCE(?, qty), qty_unit = COALESCE(?, qty_unit) WHERE id = ?",
         )
-        .run(d.genericName ?? null, d.qty ?? null, request.params.id);
+        .run(
+          d.genericName ?? null,
+          d.qty ?? null,
+          d.qtyUnit ?? null,
+          request.params.id,
+        );
       if (resultado.changes === 0)
         return reply.code(404).send({ error: "Artículo no encontrado." });
       return { ok: true };

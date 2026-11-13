@@ -50,7 +50,9 @@ CREATE INDEX IF NOT EXISTS idx_snapshot_product ON price_snapshot (product_id, f
 CREATE TABLE IF NOT EXISTS basket_item (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   generic_name TEXT NOT NULL,
-  qty REAL NOT NULL DEFAULT 1
+  qty REAL NOT NULL DEFAULT 1,
+  -- «kg» = cantidad como peso (€/kg × kg); «ud» = unidades (por defecto).
+  qty_unit TEXT NOT NULL DEFAULT 'ud'
 );
 
 CREATE TABLE IF NOT EXISTS basket_item_match (
@@ -72,6 +74,8 @@ CREATE TABLE IF NOT EXISTS saved_basket_line (
   saved_basket_id INTEGER NOT NULL REFERENCES saved_basket(id) ON DELETE CASCADE,
   generic_name TEXT NOT NULL,
   qty REAL NOT NULL,
+  -- Modo de la cantidad al guardar (mismo significado que basket_item.qty_unit).
+  qty_unit TEXT NOT NULL DEFAULT 'ud',
   store_id TEXT NOT NULL,
   store_name TEXT NOT NULL,
   product_name TEXT,
@@ -140,8 +144,30 @@ export function abrirDB(ruta = config.databasePath): DB {
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
   db.exec(ESQUEMA);
+  migrar(db);
   sembrarTiendas(db);
   return db;
+}
+
+/**
+ * Añade a bases ya existentes las columnas nuevas (CREATE IF NOT EXISTS
+ * no cubre columnas; en producción la BD de Render persiste entre deploys).
+ */
+function migrar(base: DB): void {
+  const columnas = (tabla: string) =>
+    (base.pragma(`table_info(${tabla})`) as { name: string }[]).map(
+      (c) => c.name,
+    );
+  if (!columnas("basket_item").includes("qty_unit")) {
+    base.exec(
+      "ALTER TABLE basket_item ADD COLUMN qty_unit TEXT NOT NULL DEFAULT 'ud'",
+    );
+  }
+  if (!columnas("saved_basket_line").includes("qty_unit")) {
+    base.exec(
+      "ALTER TABLE saved_basket_line ADD COLUMN qty_unit TEXT NOT NULL DEFAULT 'ud'",
+    );
+  }
 }
 
 function sembrarTiendas(base: DB): void {
